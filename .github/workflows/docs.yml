@@ -30,7 +30,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
@@ -95,7 +95,7 @@ jobs:
       # Required for peaceiris/actions-gh-pages to push to the gh-pages branch.
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Download site artefact
         uses: actions/download-artifact@v5
