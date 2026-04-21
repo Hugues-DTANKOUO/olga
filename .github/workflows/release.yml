@@ -232,26 +232,35 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Zig is used to cross-compile or to pin a reproducible libc on
+          # Linux/macOS. On native Windows it triggers a path-escaping bug
+          # in the zigcc .bat wrapper (backslashes get stripped), so we
+          # build with the plain MSVC toolchain there.
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: wheels-linux-x86_64
             manylinux: auto
+            zig: true
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             artifact_name: wheels-linux-aarch64
             manylinux: auto
+            zig: true
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: wheels-macos-x86_64
             manylinux: ""
+            zig: true
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: wheels-macos-aarch64
             manylinux: ""
+            zig: true
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             artifact_name: wheels-windows-x86_64
             manylinux: ""
+            zig: false
     steps:
       - uses: actions/checkout@v5
 
@@ -271,11 +280,13 @@ jobs:
         with:
           working-directory: olgadoc
           target: ${{ matrix.target }}
-          # `--zig` gives us reproducible cross-compiled Linux wheels without
-          # juggling sysroots by hand. `manylinux: auto` on Linux rows lets
-          # maturin-action pick the oldest glibc that still builds cleanly;
-          # non-Linux rows pass an empty string so the default (no-op) applies.
-          args: --release --out dist --zig
+          # `--zig` gives us reproducible cross-compiled Linux/macOS wheels
+          # without juggling sysroots by hand. `manylinux: auto` on Linux
+          # rows lets maturin-action pick the oldest glibc that still builds
+          # cleanly; non-Linux rows pass an empty string so the default
+          # (no-op) applies. Windows skips --zig because zigcc's .bat wrapper
+          # strips backslashes from paths — see ci.yml for the same workaround.
+          args: ${{ matrix.zig && '--release --out dist --zig' || '--release --out dist' }}
           manylinux: ${{ matrix.manylinux }}
 
       - name: Upload wheel artefact
