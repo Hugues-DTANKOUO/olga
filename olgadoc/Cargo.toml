@@ -1,6 +1,6 @@
 [package]
 name = "olgadoc"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.91"
 description = "Python bindings for Olga. PDF, DOCX, XLSX, HTML → Markdown and typed JSON, 15–40× faster than equivalent-quality OSS. Strictly-typed surface, no Any, one abi3 wheel for CPython 3.8+."

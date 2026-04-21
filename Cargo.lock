@@ -1118,7 +1118,7 @@ dependencies = [
 
 [[package]]
 name = "olga"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "assert_cmd",
  "calamine",
@@ -1142,7 +1142,7 @@ dependencies = [
 
 [[package]]
 name = "olgadoc"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "olga",
  "pyo3",

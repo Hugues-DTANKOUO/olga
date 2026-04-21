@@ -3,7 +3,7 @@ members = ["olgadoc"]
 
 [package]
 name = "olga"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.91"
 description = "Four formats, one engine. PDF, DOCX, XLSX, HTML → Markdown and typed JSON. 15–40× faster than equivalent-quality OSS tools, with pipeline pre-flight and element-level provenance."
