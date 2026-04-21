@@ -16,6 +16,12 @@ __pycache__/
 dist/
 build/
 
+# Compiled extension modules (maturin outputs — rebuilt locally with `maturin develop`)
+*.so
+*.pyd
+*.dylib
+*.dll
+
 # Editors and OS
 *.swp
 *.swo
