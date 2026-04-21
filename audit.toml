@@ -1,0 +1,17 @@
+# cargo-audit configuration
+# https://github.com/rustsec/rustsec/tree/main/cargo-audit
+#
+# This file silences advisories that are already tracked with intent in
+# `deny.toml` (the broader cargo-deny gate). Keep the two ignore lists in
+# sync — `cargo audit` and `cargo deny check advisories` run as separate
+# jobs in CI.
+
+[advisories]
+ignore = [
+    # RUSTSEC-2020-0144: `lzw` 0.10.0 is unmaintained (not a CVE — the
+    # author is unresponsive). Pulled in transitively by pdf_oxide 0.3.36
+    # for CCITT/LZW-compressed PDF streams; the suggested replacement
+    # `weezl` (same author) requires pdf_oxide to bump. Revisit when
+    # pdf_oxide > 0.3.36 ships a swap.
+    "RUSTSEC-2020-0144",
+]

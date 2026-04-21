@@ -43,7 +43,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Full history lets the ``Verify release is from main`` step check
           # merge-base against origin/main.
@@ -139,7 +139,7 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact_name: olga-windows-x86_64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
@@ -211,7 +211,7 @@ jobs:
               "${{ matrix.artifact_name }}-$VERSION.zip.sha256"
 
       - name: Upload archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.artifact_name }}
           path: dist/*
@@ -250,10 +250,10 @@ jobs:
             artifact_name: wheels-windows-x86_64
             manylinux: ""
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -276,7 +276,7 @@ jobs:
           manylinux: ${{ matrix.manylinux }}
 
       - name: Upload wheel artefact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.artifact_name }}
           path: olgadoc/dist/*.whl
@@ -295,7 +295,7 @@ jobs:
       matrix:
         target: [x86_64, aarch64]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build wheel (maturin, musllinux_1_2)
         uses: PyO3/maturin-action@v1
@@ -309,7 +309,7 @@ jobs:
           args: --release --out dist
 
       - name: Upload wheel artefact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: wheels-linux-${{ matrix.target }}-musl
           path: olgadoc/dist/*.whl
@@ -324,10 +324,10 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -339,7 +339,7 @@ jobs:
           args: --out dist
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sdist
           path: olgadoc/dist/*.tar.gz
@@ -359,10 +359,10 @@ jobs:
       - build-sdist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download every build artefact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
 
@@ -413,7 +413,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(needs.validate.outputs.version, '-') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
@@ -459,7 +459,7 @@ jobs:
       id-token: write
     steps:
       - name: Download wheel + sdist artefacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: dist
           pattern: "{wheels-*,sdist}"
