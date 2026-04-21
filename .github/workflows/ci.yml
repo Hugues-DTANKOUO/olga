@@ -20,7 +20,7 @@ env:
   # Toolchain pinned for the lint/format/audit jobs where we want
   # deterministic output. The ``test`` matrix separately exercises
   # stable/beta/nightly so we catch upcoming compiler changes.
-  RUST_TOOLCHAIN: "1.88"
+  RUST_TOOLCHAIN: "1.91"
 
 jobs:
   # ---------------------------------------------------------------------------

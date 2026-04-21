@@ -17,7 +17,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: short
-  RUST_TOOLCHAIN: "1.88"
+  RUST_TOOLCHAIN: "1.91"
 
 jobs:
   # ---------------------------------------------------------------------------
