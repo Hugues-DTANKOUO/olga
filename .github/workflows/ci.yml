@@ -180,6 +180,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Create virtualenv
+        # maturin develop refuses to install into the runner's system Python
+        # and requires an active virtualenv. Put it at the workspace root so
+        # maturin finds it via parent-dir traversal from ``olgadoc/``.
+        shell: bash
+        run: |
+          python -m venv "${GITHUB_WORKSPACE}/.venv"
+          echo "VIRTUAL_ENV=${GITHUB_WORKSPACE}/.venv" >> "$GITHUB_ENV"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            echo "${GITHUB_WORKSPACE}/.venv/Scripts" >> "$GITHUB_PATH"
+          else
+            echo "${GITHUB_WORKSPACE}/.venv/bin" >> "$GITHUB_PATH"
+          fi
+
       - name: Install Python tooling
         run: |
           python -m pip install --upgrade pip

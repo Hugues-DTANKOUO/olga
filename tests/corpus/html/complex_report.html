@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Q3 2025 Operations Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    table { border-collapse: collapse; margin: 1em 0; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background: #f0f0f0; }
+    .disclaimer { font-size: 0.85em; color: #666; }
+  </style>
+</head>
+<body>
+
+  <h1>Q3 2025 Operations Report</h1>
+
+  <p>This report provides a comprehensive overview of operational performance
+  across all business units for the third quarter of 2025. All figures are
+  preliminary and subject to final audit adjustment.</p>
+
+  <!-- Section 1: Table immediately after heading -->
+  <h2>Revenue by Region</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Region</th>
+        <th>Q1</th>
+        <th>Q2</th>
+        <th>Q3</th>
+        <th>YoY Growth</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>North America</td><td>$12.5M</td><td>$13.1M</td><td>$14.8M</td><td>+18%</td></tr>
+      <tr><td>Europe</td><td>$8.2M</td><td>$8.7M</td><td>$9.1M</td><td>+11%</td></tr>
+      <tr><td>Asia Pacific</td><td>$5.1M</td><td>$5.8M</td><td>$6.9M</td><td>+35%</td></tr>
+      <tr><td>Latin America</td><td>$2.3M</td><td>$2.5M</td><td>$2.8M</td><td>+22%</td></tr>
+    </tbody>
+  </table>
+
+  <p>Asia Pacific showed the strongest growth, driven primarily by expansion
+  into Southeast Asian markets following the Q1 partnership with TechCorp Asia.</p>
+
+  <!-- Section 2: Nested lists -->
+  <h2>Strategic Initiatives</h2>
+  <p>The following initiatives were active during Q3:</p>
+  <ul>
+    <li>Project Aurora (Platform Modernization)
+      <ul>
+        <li>Phase 1: Database migration <strong>completed</strong></li>
+        <li>Phase 2: API redesign <em>in progress</em></li>
+        <li>Phase 3: Frontend refresh
+          <ul>
+            <li>Design system audit done</li>
+            <li>Component library 60% complete</li>
+            <li>User testing scheduled for Q4</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Market Expansion Program
+      <ul>
+        <li>Vietnam office opened</li>
+        <li>Poland partnership signed</li>
+        <li>Brazil pilot launched</li>
+      </ul>
+    </li>
+    <li>Cost Optimization Initiative
+      <ul>
+        <li>Cloud spending reduced by 23%</li>
+        <li>Vendor consolidation saved $1.2M annually</li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- Section 3: Table with merged cells -->
+  <h2>Headcount Summary</h2>
+  <table>
+    <tr>
+      <th rowspan="2">Department</th>
+      <th colspan="2">Q2 2025</th>
+      <th colspan="2">Q3 2025</th>
+    </tr>
+    <tr>
+      <th>FTE</th>
+      <th>Contractors</th>
+      <th>FTE</th>
+      <th>Contractors</th>
+    </tr>
+    <tr><td>Engineering</td><td>245</td><td>32</td><td>267</td><td>28</td></tr>
+    <tr><td>Sales</td><td>120</td><td>15</td><td>128</td><td>18</td></tr>
+    <tr><td>Marketing</td><td>65</td><td>22</td><td>68</td><td>20</td></tr>
+    <tr><td>Operations</td><td>89</td><td>8</td><td>92</td><td>10</td></tr>
+    <tr><td>HR &amp; Admin</td><td>35</td><td>5</td><td>37</td><td>5</td></tr>
+  </table>
+
+  <!-- Section 4: Ordered list -->
+  <h2>Q4 Priorities</h2>
+  <ol>
+    <li>Complete Project Aurora Phase 2 by November 30</li>
+    <li>Achieve $15M North America quarterly revenue target</li>
+    <li>Launch self-service analytics dashboard for customers</li>
+    <li>Finalize 2026 budget and headcount plan</li>
+    <li>Conduct annual security audit and penetration testing</li>
+  </ol>
+
+  <!-- Section 5: Mixed content -->
+  <h2>Risk Register</h2>
+  <p>The following risks have been identified and are being actively monitored:</p>
+
+  <h3>High Priority</h3>
+  <table>
+    <tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+    <tr>
+      <td>Key person dependency on Aurora architect</td>
+      <td>Medium</td>
+      <td>Critical</td>
+      <td>Cross-training program initiated; documentation sprint in Q4</td>
+    </tr>
+    <tr>
+      <td>Cloud cost overrun during migration</td>
+      <td>Low</td>
+      <td>High</td>
+      <td>Weekly cost reviews; auto-scaling limits configured</td>
+    </tr>
+  </table>
+
+  <h3>Medium Priority</h3>
+  <p>Regulatory compliance risks in new markets are being assessed by the legal
+  team. A full compliance review is expected by end of October.</p>
+
+  <!-- Section 6: Blockquote and code -->
+  <h2>Technical Notes</h2>
+  <blockquote>
+    "The migration to the new microservices architecture has reduced average
+    API response time from 340ms to 45ms, representing a 7.5x improvement."
+    &mdash; VP Engineering, Q3 Review
+  </blockquote>
+
+  <p>The monitoring stack now uses the following configuration:</p>
+  <pre><code>monitoring:
+  metrics_interval: 30s
+  alert_threshold: 95th_percentile
+  retention_days: 90
+  dashboards:
+    - ops-overview
+    - api-latency
+    - error-budget</code></pre>
+
+  <p>All services are now instrumented with distributed tracing.</p>
+
+  <!-- Disclaimer: bold text that is NOT a heading -->
+  <p class="disclaimer"><strong>CONFIDENTIAL:</strong> This document contains
+  proprietary information intended for internal use only. Distribution outside
+  the organization is strictly prohibited without written consent from the
+  Chief Operating Officer.</p>
+
+</body>
+</html>

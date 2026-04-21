@@ -1,10 +1,13 @@
 Minimal corpus fixtures for library validation.
 
-These fixtures are intentionally source-like and human-readable:
+Layout:
 - `html/`: real HTML input consumed directly by the decoder
-- `docx/`: OOXML body snippets wrapped into a minimal DOCX archive by tests
-- `pdf/`: text payloads wrapped into a minimal valid PDF by tests
-- `xlsx/`: TSV grid data wrapped into a minimal XLSX archive by tests
+- `docx/`: source-like OOXML body snippets plus minimal DOCX archives
+- `pdf/`: source-like text payloads plus minimal valid PDFs
+- `xlsx/`: source-like TSV grids plus minimal XLSX archives
 
-The goal is stable, versioned coverage of decoder contracts without introducing
-binary fixtures into the repository.
+Fixtures are committed to the repository (total ~140 KB) so the test suite is
+hermetic — `cargo test` and `cargo llvm-cov` must succeed on a clean checkout
+without any download step. Keep new fixtures small and source-like where
+possible; the binary archives exist to exercise the end-to-end decoder path
+that a pure source-level fixture cannot cover.
