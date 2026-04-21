@@ -1262,7 +1262,11 @@ PDF page, 2 ms on a 5-page DOCX, 1–12 ms on XLSX, and 1–5 ms on HTML</strong
 That's 15–40× faster than the quality-equivalent open-source tool on
 every format — numbers independently measured against 10+ baselines on
 an 11-document adversarial corpus. See the full methodology and the
-raw per-document results in <a href="https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md">BENCHMARKS.md</a>.</p>
+raw per-document results in <a href="https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md">BENCHMARKS.md</a>.
+A post-release reproducible audit of v0.1.0, with fixtures, scripts,
+and CSV results, lives at <a href="https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark"><code>olga_v0.1.0_benchmark/</code></a>
+— <strong>1.62× faster and 2.62× more content</strong> than a hand-routed
+best-of-breed pipeline on a 50-file mixed corpus.</p>
 <p><strong>Spatial fidelity, intact.</strong> Tables stay tables. Columns stay columns.
 Figure captions stay next to their figures. Page layout, bounding
 boxes, and provenance (observed vs. inferred) survive the round-trip
@@ -1345,6 +1349,8 @@ deliberate misspellings) comes back byte-exact: no hallucinations, no
   the most common pipelines.</li>
 <li><strong><a href="https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md">Benchmarks</a></strong>
   — third-party evaluation, full corpus, baselines, known limitations.</li>
+<li><strong><a href="https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark">Independent v0.1.0 audit</a></strong>
+  — post-release reproducible benchmark with fixtures, scripts, CSVs.</li>
 <li><strong><a href="changelog/">Changelog</a></strong> — release notes.</li>
 <li><strong><a href="contributing/">Contributing</a></strong> — local development setup.</li>
 </ul>
