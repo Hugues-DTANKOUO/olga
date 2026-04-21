@@ -42,7 +42,7 @@ clap = { version = "4", features = ["derive"] }
 [dev-dependencies]
 proptest = "1"
 env_logger = "0.11"
-criterion = { version = "0.5", features = ["html_reports"] }
+criterion = { version = "0.8", features = ["html_reports"] }
 assert_cmd = "2"
 predicates = "3"
 
