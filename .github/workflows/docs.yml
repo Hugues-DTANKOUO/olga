@@ -98,7 +98,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Download site artefact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: site
           path: site
