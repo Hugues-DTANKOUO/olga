@@ -8,6 +8,19 @@ Starting with v0.2.0, each release will be documented with granular
 `Added` / `Changed` / `Fixed` / `Removed` / `Security` sections. v0.1.0
 is the single foundational cut that establishes the baseline.
 
+## [0.1.1] — 2026-04-21
+
+> Docs patch — surface the independent v0.1.0 benchmark on PyPI and crates.io.
+
+No engine changes. This release publishes the independent,
+reproducible post-release audit at
+[`olga_v0.1.0_benchmark/`](https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark)
+and links it from the crate README, the PyPI README, the MkDocs
+landing page, and `BENCHMARKS.md`. Headline result on a 50-file
+mixed-format corpus: 1.62× faster and 2.62× more extracted content
+than a hand-routed best-of-breed pipeline. The crate metadata author
+field is also corrected from "Hugues Tankouo" to "Hugues Dtankouo".
+
 ## [0.1.0] — 2026-04-21
 
 > First public release — the end-to-end Olga pipeline in one cut.
@@ -22,5 +35,6 @@ an MkDocs site, and a full CI/CD pipeline publishing to crates.io and
 PyPI. The public API is stable enough for evaluation and prototyping;
 expect minor breaking changes on the path to 1.0.
 
-[Unreleased]: https://github.com/Hugues-DTANKOUO/olga/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Hugues-DTANKOUO/olga/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Hugues-DTANKOUO/olga/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Hugues-DTANKOUO/olga/releases/tag/v0.1.0
