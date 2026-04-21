@@ -18,6 +18,9 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: short
   RUST_TOOLCHAIN: "1.91"
+  # Force Node.js 24 for every JavaScript action, including transitive
+  # ones still pinned to Node 20 by upstream. See ci.yml for context.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   # ---------------------------------------------------------------------------

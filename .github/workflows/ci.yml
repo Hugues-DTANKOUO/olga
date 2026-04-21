@@ -21,6 +21,13 @@ env:
   # deterministic output. The ``test`` matrix separately exercises
   # stable/beta/nightly so we catch upcoming compiler changes.
   RUST_TOOLCHAIN: "1.91"
+  # Force Node.js 24 for every JavaScript action in this workflow,
+  # including transitive ones. codecov/codecov-action@v5 still pins
+  # actions/github-script@v7 (Node 20) internally, which triggers
+  # GitHub's deprecation warning in the coverage job. This opt-in is
+  # the official workaround; drop it once all upstream actions ship
+  # Node 24-native versions.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   # ---------------------------------------------------------------------------
