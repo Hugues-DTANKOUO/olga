@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "olgadoc"
 version = "0.1.0"
 description = "Python bindings for Olga. PDF, DOCX, XLSX, HTML → Markdown and typed JSON, 15–40× faster than equivalent-quality OSS. Strictly-typed surface, no Any, one abi3 wheel for CPython 3.8+."
-authors = [{ name = "Hugues Tankouo", email = "huguesdtankouo@gmail.com" }]
+authors = [{ name = "Hugues Dtankouo", email = "huguesdtankouo@gmail.com" }]
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
