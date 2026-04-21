@@ -10,7 +10,7 @@
 //!   placed at its exact geometric position from the PDF. No semantic markup.
 //!
 //! - [`markdown`] — Markdown with faithful spatial placement plus inline
-//!   formatting (**bold**, *italic*, [links](url)). Same geometric approach
+//!   formatting (**bold**, *italic*, `[links](url)`). Same geometric approach
 //!   as spatial, enriched with font and annotation metadata.
 
 pub(crate) mod col_resolve;

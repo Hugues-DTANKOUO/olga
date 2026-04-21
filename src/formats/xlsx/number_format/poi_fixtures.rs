@@ -43,8 +43,6 @@
 //! the integration path. The companion task #44 transliterates SheetJS
 //! SSF's ~3000-assertion `test.tsv` for cross-engine validation.
 
-#![cfg(test)]
-
 use super::contract::FormatOptions;
 use super::date_formatter::{format_date_body, format_elapsed_body};
 use super::general_formatter::format_general;

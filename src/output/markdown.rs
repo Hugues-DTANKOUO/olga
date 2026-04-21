@@ -4,7 +4,7 @@
 //! bounding boxes), but enriched with markdown inline markers:
 //! - **bold** from font weight/name
 //! - *italic* from font style
-//! - [linked text](url) from PDF link annotations
+//! - `[linked text](url)` from PDF link annotations
 //!
 //! Alignment is preserved exactly as in the spatial renderer.
 //! No semantic table detection — tables will come later via the geometric model.

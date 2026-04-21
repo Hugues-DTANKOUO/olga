@@ -72,8 +72,6 @@
 //! follow-up task; including those fixtures today would just trip the
 //! "not yet supported" diagnostic.
 
-#![cfg(test)]
-
 use super::contract::FormatOptions;
 use super::date_formatter::{format_date_body, format_elapsed_body};
 use super::general_formatter::format_general;

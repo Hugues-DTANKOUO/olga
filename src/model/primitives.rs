@@ -2,7 +2,7 @@
 //!
 //! These types represent the intermediate model between format decoders and the FSM.
 //! Every format decoder produces a stream of [`Primitive`]s, optionally enriched with
-//! [`SemanticHint`]s. The FSM consumes this stream and emits [`DocumentNode`]s.
+//! [`SemanticHint`]s. The FSM consumes this stream and emits `DocumentNode`s.
 //!
 //! **Contract:** All coordinates are normalized to 0.0–1.0 relative to the effective
 //! page dimensions (after rotation, using CropBox). Y=0.0 is the TOP of the page.

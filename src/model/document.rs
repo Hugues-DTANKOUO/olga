@@ -1,6 +1,6 @@
 //! Output document model — the structured tree emitted by the FSM.
 //!
-//! The FSM consumes a stream of [`Primitive`]s and emits a stream of
+//! The FSM consumes a stream of `Primitive`s and emits a stream of
 //! [`DocumentNode`]s forming a hierarchical tree. Each node represents a
 //! detected structural element (heading, paragraph, table, etc.) with its
 //! children.

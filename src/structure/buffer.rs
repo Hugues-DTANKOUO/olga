@@ -32,7 +32,7 @@ use super::types::{FontHistogram, PageFlush, StructureConfig};
 
 /// Collects primitives page-by-page and flushes completed pages.
 ///
-/// **Memory contract:** After [`flush`] returns, the buffer holds zero
+/// **Memory contract:** After a `flush` returns, the buffer holds zero
 /// primitives from the completed page. Capacity may be retained for reuse.
 /// Peak memory is O(max primitives per page), never O(document).
 #[derive(Debug)]

@@ -24,7 +24,7 @@ impl StructureEngine {
     ///
     /// Detectors run on each page after reading-order correction and before
     /// assembly. They only emit hints for primitives that lack format-derived
-    /// hints (checked by [`apply_detectors`]).
+    /// hints (checked by `apply_detectors`).
     ///
     /// Multiple detectors can be registered; when they produce hints for the
     /// same primitive, the highest-confidence hint wins.

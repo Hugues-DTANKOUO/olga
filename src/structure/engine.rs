@@ -55,7 +55,7 @@ use super::types::StructureConfig;
 /// The public entry point for document structuring.
 ///
 /// Owns a [`StructureConfig`] and a set of pluggable [`StructureDetector`]s.
-/// Call [`structure`](Self::structure) to process a [`DecodeResult`] into a
+/// Call [`structure`](Self::structure) to process a `DecodeResult` into a
 /// [`StructureResult`].
 ///
 /// # Pipeline

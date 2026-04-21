@@ -19,7 +19,7 @@
 //! The [`LayoutAnalyzer`] trait produces [`TextBox`]es from a page of
 //! primitives. The [`HeuristicLayoutAnalyzer`] is Olga's default
 //! implementation. Results are used by the Structure Engine's detector
-//! pipeline to emit [`SemanticHint`]s for untagged pages.
+//! pipeline to emit `SemanticHint`s for untagged pages.
 //!
 //! # Prior art
 //!

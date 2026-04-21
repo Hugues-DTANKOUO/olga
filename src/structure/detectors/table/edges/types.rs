@@ -31,7 +31,7 @@ pub enum CellValidation {
 // Edge type
 // ---------------------------------------------------------------------------
 
-/// A horizontal or vertical line segment in normalized [0,1] page coordinates.
+/// A horizontal or vertical line segment in normalized \[0,1\] page coordinates.
 #[derive(Debug, Clone, Copy)]
 pub struct Edge {
     pub orientation: Orientation,
@@ -62,7 +62,7 @@ impl Edge {
 // Configuration
 // ---------------------------------------------------------------------------
 
-/// Tolerance parameters for edge processing, expressed in normalized [0,1]
+/// Tolerance parameters for edge processing, expressed in normalized \[0,1\]
 /// page coordinates.
 ///
 /// Defaults are calibrated so that 0.005 in normalized coordinates ≈ 3 PDF

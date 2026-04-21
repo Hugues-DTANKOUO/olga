@@ -29,12 +29,12 @@
 //!
 //! Three focused submodules, each owned by its own file:
 //!
-//! 1. [`types`] — [`CellValidation`], [`Edge`], [`Orientation`], [`EdgeConfig`]
+//! 1. `types` — [`CellValidation`], [`Edge`], [`Orientation`], [`EdgeConfig`]
 //!    and their inherent impls. The vocabulary shared by the rest of the
 //!    pipeline and by downstream consumers (`cells`, `lattice`, `stream`).
-//! 2. [`extract`] — [`extract_edges`] reads `Line` / `Rectangle` primitives
+//! 2. `extract` — [`extract_edges`] reads `Line` / `Rectangle` primitives
 //!    and emits axis-aligned edges in normalized coordinates.
-//! 3. [`merge`] — [`snap_and_merge`] collapses nearby parallel edges to a
+//! 3. `merge` — [`snap_and_merge`] collapses nearby parallel edges to a
 //!    shared position and joins overlapping collinear segments.
 
 mod extract;

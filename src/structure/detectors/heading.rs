@@ -2,7 +2,7 @@
 //!
 //! # Algorithm
 //!
-//! 1. From the cumulative [`FontHistogram`], determine the body text
+//! 1. From the cumulative `FontHistogram`, determine the body text
 //!    font size (most frequent size).
 //! 2. For each unhinted text primitive, check if its font size is
 //!    significantly larger than body text AND in the top percentile of

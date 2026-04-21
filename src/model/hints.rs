@@ -1,6 +1,6 @@
 //! Semantic hint types for the Olga pipeline.
 //!
-//! Hints annotate [`Primitive`]s with structural roles. Rich formats (DOCX, HTML)
+//! Hints annotate `Primitive`s with structural roles. Rich formats (DOCX, HTML)
 //! provide hints directly; for PDF they are inferred by geometric/typographic
 //! heuristics.
 
@@ -106,9 +106,9 @@ pub enum HintKind {
     },
     /// A cell that continues a table from the previous page.
     ///
-    /// Emitted by the [`TableDetector`] when it detects a table whose column
+    /// Emitted by the `TableDetector` when it detects a table whose column
     /// positions match the currently open table from the previous page
-    /// (via [`DetectionContext::open_table_columns`]). The assembler uses
+    /// (via `DetectionContext::open_table_columns`). The assembler uses
     /// this to append rows to the existing table instead of opening a new one.
     ///
     /// `row` is local to this page (starting at 0). The assembler applies
