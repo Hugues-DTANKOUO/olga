@@ -36,6 +36,10 @@ That's 15–40× faster than the quality-equivalent open-source tool on
 every format — numbers independently measured against 10+ baselines on
 an 11-document adversarial corpus. See the full methodology and the
 raw per-document results in [BENCHMARKS.md](https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md).
+A post-release reproducible audit of v0.1.0, with fixtures, scripts,
+and CSV results, lives at [`olga_v0.1.0_benchmark/`](https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark)
+— **1.62× faster and 2.62× more content** than a hand-routed
+best-of-breed pipeline on a 50-file mixed corpus.
 
 **Spatial fidelity, intact.** Tables stay tables. Columns stay columns.
 Figure captions stay next to their figures. Page layout, bounding
@@ -130,6 +134,8 @@ One abi3 wheel covers CPython 3.8+.
   the most common pipelines.
 - **[Benchmarks](https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md)**
   — third-party evaluation, full corpus, baselines, known limitations.
+- **[Independent v0.1.0 audit](https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark)**
+  — post-release reproducible benchmark with fixtures, scripts, CSVs.
 - **[Changelog](./changelog.md)** — release notes.
 - **[Contributing](./contributing.md)** — local development setup.
 

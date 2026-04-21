@@ -1,0 +1,18 @@
+file,extractor,outcome,detail
+empty.pdf,olgadoc,raised,"OlgaError: Unsupported format: Failed to open PDF: Invalid PDF header: expected '%PDF-', found 'File is empty (0 bytes r"
+empty.pdf,pymupdf,raised,EmptyFileError: Cannot open empty file: filename='/tmp/tmp1xfftwe0/empty.pdf'.
+empty.pdf,pdfplumber,raised,PdfminerException: No /Root object! - Is this really a PDF?
+empty.pdf,pypdf,raised,EmptyFileError: Cannot read an empty file
+unicode.pdf,olgadoc,OK,332 chars
+unicode.pdf,pymupdf,OK,146 chars
+unicode.pdf,pdfplumber,OK,145 chars
+unicode.pdf,pypdf,OK,145 chars
+broken.html,olgadoc,OK,239 chars
+broken.html,bs4,OK,141 chars
+broken.html,trafilatura,OK,260 chars
+minimal.docx,olgadoc,OK,32 chars
+minimal.docx,docx2txt,OK,32 chars
+minimal.docx,mammoth,OK,34 chars
+corrupt.xlsx,olgadoc,raised,OlgaError: Unsupported format: Not a valid XLSX ZIP: invalid Zip archive: Could not find EOCD
+corrupt.xlsx,calamine,raised,ZipError: invalid Zip archive: Could not find EOCD
+corrupt.xlsx,openpyxl,raised,BadZipFile: File is not a zip file
