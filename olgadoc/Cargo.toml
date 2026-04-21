@@ -1,0 +1,21 @@
+[package]
+name = "olgadoc"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Python bindings for Olga. PDF, DOCX, XLSX, HTML → Markdown and typed JSON, 15–40× faster than equivalent-quality OSS. Strictly-typed surface, no Any, one abi3 wheel for CPython 3.8+."
+authors = ["Hugues Tankouo <huguesdtankouo@gmail.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/Hugues-DTANKOUO/olga"
+readme = "README.md"
+
+[lib]
+name = "olgadoc"
+# cdylib -> the Python-importable extension module.
+# rlib   -> lets Cargo/CI run `cargo test` against the Rust wrapper types.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+olga = { path = ".." }
+pyo3 = { version = "0.28", features = ["extension-module", "abi3-py38"] }
+serde_json = "1"

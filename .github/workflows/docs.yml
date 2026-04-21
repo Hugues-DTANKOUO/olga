@@ -1,0 +1,103 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Only one deploy at a time. PR builds don't deploy, so their concurrency
+# group is per-ref; main's deploy job uses a single group so a second merge
+# queues behind the first.
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+  RUST_TOOLCHAIN: "1.88"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build the MkDocs site. Runs on every PR so broken doc links fail the PR.
+  # ---------------------------------------------------------------------------
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: docs
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install maturin + docs requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install maturin -r docs-requirements.txt
+
+      - name: Build + install extension
+        # mkdocstrings imports the package to extract signatures, so the
+        # compiled extension must be importable on the Python path.
+        working-directory: olgadoc
+        run: maturin develop --release
+
+      - name: mkdocs build --strict
+        # --strict turns warnings (broken links, missing nav entries,
+        # unresolved references) into errors.
+        run: mkdocs build --strict
+
+      - name: Upload site artefact
+        # Even on PRs we upload the built site so the deploy job on main can
+        # simply download it, and so reviewers can grab a preview tarball if
+        # they want to inspect the rendered HTML.
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site/
+          if-no-files-found: error
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # Deploy to GitHub Pages — only on merges to main, never on PRs or forks.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: deploy (gh-pages)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      # Required for peaceiris/actions-gh-pages to push to the gh-pages branch.
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download site artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          # CNAME file is committed at docs/CNAME if a custom domain is ever
+          # configured. peaceiris copies it through automatically.
+          user_name: "github-actions[bot]"
+          user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_message: "docs: deploy ${{ github.sha }}"

@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussions
+    url: https://github.com/Hugues-DTANKOUO/olga/discussions
+    about: Ask questions, share use cases, or float ideas before opening an issue.
+  - name: Documentation
+    url: https://hugues-dtankouo.github.io/olga/
+    about: Usage guides, API reference, and the JSON tree schema.
+  - name: Security advisories
+    url: https://github.com/Hugues-DTANKOUO/olga/security/advisories/new
+    about: Report security vulnerabilities privately.

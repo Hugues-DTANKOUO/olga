@@ -1,0 +1,61 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "olgadoc"
+version = "0.1.0"
+description = "Python bindings for Olga. PDF, DOCX, XLSX, HTML → Markdown and typed JSON, 15–40× faster than equivalent-quality OSS. Strictly-typed surface, no Any, one abi3 wheel for CPython 3.8+."
+authors = [{ name = "Hugues Tankouo", email = "huguesdtankouo@gmail.com" }]
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.8"
+# ``typing_extensions>=4.1`` ships ``Required`` / ``NotRequired`` / ``Literal``
+# backports used in the typed payload classes for Python < 3.11.
+dependencies = ["typing_extensions>=4.1"]
+keywords = [
+    "pdf",
+    "docx",
+    "xlsx",
+    "html",
+    "document",
+    "extraction",
+    "markdown",
+    "rag",
+    "llm",
+    "intelligent-document-processing",
+    "idp",
+    "typed",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Rust",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Text Processing",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage      = "https://hugues-dtankouo.github.io/olga/"
+Documentation = "https://hugues-dtankouo.github.io/olga/api/"
+Repository    = "https://github.com/Hugues-DTANKOUO/olga"
+Issues        = "https://github.com/Hugues-DTANKOUO/olga/issues"
+Changelog     = "https://github.com/Hugues-DTANKOUO/olga/blob/main/CHANGELOG.md"
+
+[tool.maturin]
+# Build a single extension module — everything is exposed directly under the
+# `olgadoc` import so callers do `import olgadoc; doc = olgadoc.Document.open(...)`.
+module-name = "olgadoc"
+features = ["pyo3/extension-module"]
+# Keep the Rust-side source isolated from Python package layout.
+python-source = "python"

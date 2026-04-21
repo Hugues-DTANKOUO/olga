@@ -1,0 +1,97 @@
+name: Feature request
+description: Suggest a new capability, an improvement, or a new format.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Concrete use cases help a lot — what
+        you're trying to do is usually more useful than how you think it
+        should be implemented.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't you do today? What's the friction?
+      placeholder: "Today I have to post-process Olga's text output to recover footnote references because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would the ideal behaviour look like?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds, other tools, or simpler variants you ruled out.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - PDF extraction
+        - DOCX extraction
+        - XLSX extraction
+        - HTML extraction
+        - Table reconstruction
+        - Layout / structure detection
+        - Output (text / markdown / JSON)
+        - CLI
+        - Python bindings (olgadoc)
+        - Performance
+        - Documentation
+        - CI / build
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How important is this to you?
+      options:
+        - Nice to have
+        - Would be helpful
+        - Blocks my use case
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Concrete use case
+      description: Walk us through a real scenario where this would help.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: API sketch (optional)
+      render: rust
+      placeholder: |
+        let doc = olga::Document::open("foo.pdf")?;
+        let footnotes = doc.footnotes(); // <-- new
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and discussions for duplicates
+          required: true
+        - label: I'd be willing to help implement this (entirely optional)
+          required: false

@@ -1,0 +1,359 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Cancel in-progress runs on the same ref when a new push lands. Every main
+# merge gets a unique ref, so merges to main are unaffected — this only
+# collapses noise from force-pushes and PR updates.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+  # Toolchain pinned for the lint/format/audit jobs where we want
+  # deterministic output. The ``test`` matrix separately exercises
+  # stable/beta/nightly so we catch upcoming compiler changes.
+  RUST_TOOLCHAIN: "1.88"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Format — rustfmt must be clean
+  # ---------------------------------------------------------------------------
+  fmt:
+    name: fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt
+
+      - name: cargo fmt --all -- --check
+        run: cargo fmt --all -- --check
+
+  # ---------------------------------------------------------------------------
+  # Clippy — lint the whole workspace, deny warnings
+  # ---------------------------------------------------------------------------
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: clippy
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: clippy
+
+      - name: cargo clippy --workspace
+        # The olgadoc extension-module target cannot link Python symbols during
+        # a plain ``cargo`` build on CI runners, so we exclude it here — its
+        # lints run as part of the ``python`` job via maturin instead.
+        run: cargo clippy --workspace --exclude olgadoc --all-targets -- -D warnings
+
+  # ---------------------------------------------------------------------------
+  # Test — matrix across 3 OS × {stable, beta}, plus nightly on Ubuntu
+  # ---------------------------------------------------------------------------
+  test:
+    name: test / ${{ matrix.os }} / ${{ matrix.rust }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable, beta]
+        include:
+          # Nightly on Ubuntu only — catches upcoming Rust changes without
+          # tripling cost across every OS.
+          - os: ubuntu-latest
+            rust: nightly
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          # Scope per OS and toolchain so each cell gets its own cache.
+          shared-key: test-${{ matrix.os }}-${{ matrix.rust }}
+
+      - name: cargo build --workspace
+        run: cargo build --workspace --exclude olgadoc --all-targets
+
+      - name: cargo test --workspace
+        # Same exclusion as clippy — olgadoc is exercised by the ``python`` job.
+        run: cargo test --workspace --exclude olgadoc --all-targets
+
+      - name: cargo doc --no-deps
+        # Catches broken intra-doc links and malformed doc comments early.
+        run: cargo doc --workspace --exclude olgadoc --no-deps
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+  # ---------------------------------------------------------------------------
+  # CLI smoke — the binary must build and respond to --help / --version
+  # ---------------------------------------------------------------------------
+  cli:
+    name: cli / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cli-${{ matrix.os }}
+
+      - name: Build CLI (release)
+        run: cargo build --release --bin olga
+
+      - name: olga --help
+        run: cargo run --release --bin olga -- --help
+
+      - name: olga --version
+        run: cargo run --release --bin olga -- --version
+
+  # ---------------------------------------------------------------------------
+  # Python — build wheel with maturin, run ruff + mypy + pytest
+  # ---------------------------------------------------------------------------
+  python:
+    name: python / ${{ matrix.os }} / py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # abi3-py38 means a single wheel covers 3.8+, but we smoke-test the
+        # full supported interpreter range so we catch stdlib regressions and
+        # CPython ABI shifts early.
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    defaults:
+      run:
+        working-directory: olgadoc
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: python-${{ matrix.os }}
+          workspaces: |
+            .
+            olgadoc
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install maturin ruff mypy pytest typing_extensions
+
+      - name: ruff check
+        run: ruff check python/ tests/ --select F,E,W,I
+
+      - name: ruff format --check
+        run: ruff format --check python/ tests/
+
+      - name: Build + install extension (develop)
+        run: maturin develop --release
+
+      - name: mypy --strict
+        run: mypy --strict python/olgadoc/ tests/
+
+      - name: pytest
+        run: pytest tests/ -q
+
+  # ---------------------------------------------------------------------------
+  # Wheels — build release artefacts for every platform we ship, on every PR
+  # ---------------------------------------------------------------------------
+  # We rebuild wheels on every PR (not just release) to catch platform-specific
+  # compile failures early — the manylinux / macOS universal / Windows MSVC
+  # toolchains each have their own failure modes that don't show up in the
+  # ``python`` job.
+  wheels:
+    name: wheels / ${{ matrix.target.os }} / ${{ matrix.target.target }}
+    runs-on: ${{ matrix.target.runner }}
+    needs: [fmt, clippy, python]
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { os: linux, target: x86_64-unknown-linux-gnu, runner: ubuntu-latest }
+          - { os: linux, target: aarch64-unknown-linux-gnu, runner: ubuntu-latest }
+          - { os: macos, target: x86_64-apple-darwin, runner: macos-latest }
+          - { os: macos, target: aarch64-apple-darwin, runner: macos-latest }
+          - { os: windows, target: x86_64-pc-windows-msvc, runner: windows-latest }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: ${{ matrix.target.target }}
+
+      - name: Build wheel (maturin)
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: olgadoc
+          target: ${{ matrix.target.target }}
+          # abi3 wheel -> one artefact covers every CPython 3.8+.
+          args: --release --out dist --zig
+          manylinux: ${{ matrix.target.os == 'linux' && 'auto' || '' }}
+
+      - name: Upload wheel artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.target.target }}
+          path: olgadoc/dist/*.whl
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Coverage — enforce 85% line coverage and upload to Codecov
+  # ---------------------------------------------------------------------------
+  # Runs on PRs and main merges so we get coverage deltas on every PR. The
+  # thresholded re-run of ``llvm-cov report`` gates the job independently of
+  # Codecov so that a Codecov outage cannot silently drop our floor.
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: llvm-tools-preview
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: coverage
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Generate coverage (lcov)
+        # We exclude:
+        #   * olgadoc — the PyO3 extension is covered end-to-end by the
+        #     ``python`` job, not the Rust test suite.
+        #   * src/main.rs — CLI entry point, mostly argument wiring covered
+        #     by the ``cli`` smoke job and would skew the floor.
+        run: |
+          cargo llvm-cov --workspace --exclude olgadoc --lib --tests \
+            --ignore-filename-regex '(src/main\.rs|/benches/|/bin/)' \
+            --lcov --output-path lcov.info
+
+      - name: Enforce 85% line coverage
+        run: |
+          cargo llvm-cov report \
+            --ignore-filename-regex '(src/main\.rs|/benches/|/bin/)' \
+            --fail-under-lines 85
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # Don't fail CI on Codecov hiccups — our own threshold gate above
+          # is the source of truth. Codecov provides trendlines and PR
+          # annotations.
+          fail_ci_if_error: false
+
+  # ---------------------------------------------------------------------------
+  # Bench — benchmarks must still compile (no-run; we don't time in CI)
+  # ---------------------------------------------------------------------------
+  # Criterion benches depend on the same public API surface as the library,
+  # so a silent breakage here usually signals a real regression in the API.
+  bench:
+    name: bench (compile only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: bench
+
+      - name: cargo bench --no-run
+        run: cargo bench --no-run --workspace --exclude olgadoc
+
+  # ---------------------------------------------------------------------------
+  # Security audit — RUSTSEC advisories, yanked crates
+  # ---------------------------------------------------------------------------
+  audit:
+    name: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: cargo audit
+        uses: actions-rust-lang/audit@v1
+
+  # ---------------------------------------------------------------------------
+  # Dependency policy — license allowlist, banned crates, unknown registries
+  # ---------------------------------------------------------------------------
+  # Reads ``deny.toml`` at the workspace root. See that file for the policy.
+  deny:
+    name: deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: cargo deny check
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          # Run all the checks configured in deny.toml (advisories, licenses,
+          # bans, sources). Leaving arguments empty means "all checks".
+          arguments: ""

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Olga — 15–40× faster document extraction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1200px;
+    height: 630px;
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    background: #FAFAF7;
+    color: #0F0F0F;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+  .card {
+    width: 1200px;
+    height: 630px;
+    padding: 60px 96px 52px 120px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  /* Left oxblood rule — continuity with v1 */
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 80px;
+    top: 60px;
+    bottom: 52px;
+    width: 3px;
+    background: #7A1E1E;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #0F0F0F;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #7A1E1E;
+    border-radius: 50%;
+  }
+  .top-meta {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #525252;
+  }
+  .hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 58px;
+  }
+  .numeric {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 224px;
+    font-weight: 500;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    color: #0F0F0F;
+    white-space: nowrap;
+  }
+  .numeric .times {
+    color: #8F2424;
+    margin-right: 18px;
+  }
+  .numeric .faster {
+    font-size: 92px;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    color: #0F0F0F;
+  }
+  .subline {
+    margin-top: 20px;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    color: #2B2B2B;
+    line-height: 1.3;
+  }
+  .subline .dim {
+    color: #8A8A8A;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 24px;
+    letter-spacing: 0.02em;
+    margin-left: 6px;
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 18px;
+    border-top: 1px solid rgba(15, 15, 15, 0.08);
+  }
+  .bottom-left {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    color: #525252;
+    text-transform: uppercase;
+  }
+  .bottom-left .sep { color: #B0B0A8; margin: 0 12px; }
+  .bottom-right {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 16px;
+    color: #525252;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <div class="brand">Olga</div>
+    <div class="top-meta">Document extraction · Rust + Python</div>
+  </div>
+  <div class="hero">
+    <div class="numeric"><span>15–40</span><span class="times">×</span><span class="faster">faster</span></div>
+    <div class="subline">Four formats. One engine.<span class="dim">PDF · DOCX · XLSX · HTML</span></div>
+  </div>
+  <div class="bottom">
+    <div class="bottom-left">Spatial fidelity<span class="sep">·</span>Strictly-typed<span class="sep">·</span>No LLM in the loop</div>
+    <div class="bottom-right">github.com/Hugues-DTANKOUO/olga</div>
+  </div>
+</div>
+</body>
+</html>

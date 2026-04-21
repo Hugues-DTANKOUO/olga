@@ -1,0 +1,477 @@
+name: Release
+
+on:
+  # A `vX.Y.Z` tag pushed to the repository kicks off the whole pipeline.
+  # The ``validate`` job rejects anything that doesn't match the workspace
+  # versions, so a typo in the tag fails fast without publishing artefacts.
+  push:
+    tags:
+      - 'v*.*.*'
+  # Manual re-runs pick a tag explicitly. Useful for resuming a publish that
+  # stalled on a transient upstream outage (crates.io, PyPI) without having
+  # to delete and re-push the tag.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v0.2.0)'
+        required: true
+        type: string
+
+# ``contents: write`` is needed to create GitHub Releases; the wheels job
+# needs ``id-token: write`` for PyPI Trusted Publishing (OIDC).
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+  # Kept in lockstep with rust-version in Cargo.toml so every published
+  # artefact is built on the same toolchain.
+  RUST_TOOLCHAIN: "1.88"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Validate — tag matches workspace versions, tag is on main
+  # ---------------------------------------------------------------------------
+  # This is the single source of truth for "what version are we releasing".
+  # Every other job downstream consumes ``needs.validate.outputs.version`` so
+  # there's no risk of Cargo.toml and pyproject.toml drifting apart during a
+  # release.
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history lets the ``Verify release is from main`` step check
+          # merge-base against origin/main.
+          fetch-depth: 0
+
+      - name: Resolve version from Cargo.toml
+        id: version
+        run: |
+          VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $VERSION"
+
+      - name: Verify tag matches Cargo.toml version
+        # workflow_dispatch uses the input; push uses the ref_name. Both paths
+        # must resolve to "v<cargo-version>" or we abort.
+        run: |
+          case "${{ github.event_name }}" in
+            workflow_dispatch) TAG="${{ github.event.inputs.tag }}" ;;
+            *)                 TAG="${{ github.ref_name }}" ;;
+          esac
+          VERSION="${{ steps.version.outputs.version }}"
+          EXPECTED_TAG="v$VERSION"
+          if [ "$TAG" != "$EXPECTED_TAG" ]; then
+            echo "Error: Tag '$TAG' does not match Cargo.toml version '$VERSION'"
+            echo "Expected tag: $EXPECTED_TAG"
+            exit 1
+          fi
+
+      - name: Verify olgadoc pyproject.toml matches
+        # Catches releases where someone bumped Cargo.toml but forgot the
+        # Python package. olgadoc publishes to PyPI as a separate distribution
+        # so its version must track the Rust crate.
+        run: |
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          PY_VERSION=$(grep '^version = ' olgadoc/pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          if [ "$CARGO_VERSION" != "$PY_VERSION" ]; then
+            echo "Error: Cargo.toml ($CARGO_VERSION) and olgadoc/pyproject.toml ($PY_VERSION) versions don't match"
+            exit 1
+          fi
+          echo "OK: versions match — $CARGO_VERSION"
+
+      - name: Verify olgadoc/Cargo.toml matches
+        run: |
+          TOP_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          DOC_VERSION=$(grep '^version = ' olgadoc/Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          if [ "$TOP_VERSION" != "$DOC_VERSION" ]; then
+            echo "Error: Cargo.toml ($TOP_VERSION) and olgadoc/Cargo.toml ($DOC_VERSION) versions don't match"
+            exit 1
+          fi
+          echo "OK: workspace Cargo.toml versions match — $TOP_VERSION"
+
+      - name: Verify release is from main branch
+        # Release tags must always sit on a commit reachable from main — this
+        # prevents a forgotten feature branch from ever becoming an immutable
+        # published release.
+        run: |
+          git fetch origin main
+          TAG_SHA=$(git rev-parse HEAD)
+          if ! git merge-base --is-ancestor "$TAG_SHA" origin/main; then
+            echo "Error: release tags must be created from commits on the main branch"
+            echo "Tag SHA: $TAG_SHA"
+            exit 1
+          fi
+          echo "OK: tag points to a commit on main"
+
+  # ---------------------------------------------------------------------------
+  # Build release binaries for every platform we ship
+  # ---------------------------------------------------------------------------
+  build-binaries:
+    name: binary / ${{ matrix.target }}
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: olga-linux-x86_64
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact_name: olga-linux-x86_64-musl
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact_name: olga-linux-aarch64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: olga-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: olga-macos-aarch64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: olga-windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-${{ matrix.target }}
+
+      - name: Install musl toolchain
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Install aarch64 cross-compiler
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Build release binary
+        shell: bash
+        env:
+          # Point cargo at the cross linker when we're building for aarch64.
+          # The env var is otherwise ignored for non-matching targets.
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.target == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
+        run: cargo build --release --bin olga --target ${{ matrix.target }}
+
+      - name: Strip binary (Unix)
+        if: runner.os != 'Windows' && matrix.target != 'aarch64-unknown-linux-gnu'
+        shell: bash
+        run: strip "target/${{ matrix.target }}/release/olga"
+
+      - name: Strip binary (Linux aarch64)
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: aarch64-linux-gnu-strip "target/${{ matrix.target }}/release/olga"
+
+      - name: Create archive (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          mkdir -p dist
+          cd "target/${{ matrix.target }}/release"
+          tar czf "../../../dist/${{ matrix.artifact_name }}-${VERSION}.tar.gz" olga
+          cd -
+          # Publish a sha256 next to each archive so users can verify the
+          # download matches the commit that produced it.
+          cd dist
+          sha256sum "${{ matrix.artifact_name }}-${VERSION}.tar.gz" \
+            > "${{ matrix.artifact_name }}-${VERSION}.tar.gz.sha256"
+
+      - name: Create archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $VERSION = "${{ needs.validate.outputs.version }}"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Set-Location target/${{ matrix.target }}/release
+          Compress-Archive -Path olga.exe `
+            -DestinationPath "../../../dist/${{ matrix.artifact_name }}-$VERSION.zip"
+          Set-Location ../../../dist
+          $hash = (Get-FileHash "${{ matrix.artifact_name }}-$VERSION.zip" `
+                   -Algorithm SHA256).Hash.ToLower()
+          "$hash  ${{ matrix.artifact_name }}-$VERSION.zip" `
+            | Out-File -Encoding ASCII `
+              "${{ matrix.artifact_name }}-$VERSION.zip.sha256"
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/*
+          retention-days: 7
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Build Python wheels (manylinux / macOS / Windows)
+  # ---------------------------------------------------------------------------
+  build-python-wheels:
+    name: wheel / ${{ matrix.target }}
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: wheels-linux-x86_64
+            manylinux: auto
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact_name: wheels-linux-aarch64
+            manylinux: auto
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: wheels-macos-x86_64
+            manylinux: ""
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: wheels-macos-aarch64
+            manylinux: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: wheels-windows-x86_64
+            manylinux: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: ${{ matrix.target }}
+
+      - name: Build wheel (maturin)
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: olgadoc
+          target: ${{ matrix.target }}
+          # `--zig` gives us reproducible cross-compiled Linux wheels without
+          # juggling sysroots by hand. `manylinux: auto` on Linux rows lets
+          # maturin-action pick the oldest glibc that still builds cleanly;
+          # non-Linux rows pass an empty string so the default (no-op) applies.
+          args: --release --out dist --zig
+          manylinux: ${{ matrix.manylinux }}
+
+      - name: Upload wheel artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: olgadoc/dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Build musllinux wheels — Alpine / distroless consumers
+  # ---------------------------------------------------------------------------
+  build-python-wheels-musl:
+    name: wheel / musl / ${{ matrix.target }}
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheel (maturin, musllinux_1_2)
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: olgadoc
+          target: ${{ matrix.target }}
+          # musllinux_1_2 covers Alpine 3.13+ and most distroless base
+          # images; wider compatibility than 1_1 for only a marginal
+          # decrease in reachable systems.
+          manylinux: musllinux_1_2
+          args: --release --out dist
+
+      - name: Upload wheel artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.target }}-musl
+          path: olgadoc/dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Build Python sdist — one per release, from Linux x86_64
+  # ---------------------------------------------------------------------------
+  build-sdist:
+    name: sdist
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist (maturin)
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: olgadoc
+          command: sdist
+          args: --out dist
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: olgadoc/dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Create the GitHub Release once every artefact exists
+  # ---------------------------------------------------------------------------
+  create-release:
+    name: create GitHub Release
+    needs:
+      - validate
+      - build-binaries
+      - build-python-wheels
+      - build-python-wheels-musl
+      - build-sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download every build artefact
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Stage files for the release
+        # softprops/action-gh-release accepts a glob, but collecting the
+        # files into a single directory makes the diagnostic `ls` below
+        # actually useful when a future reviewer has to audit what shipped.
+        run: |
+          mkdir -p release-files
+          find artifacts -type f \
+            \( -name "*.tar.gz" -o -name "*.tar.gz.sha256" \
+            -o -name "*.zip" -o -name "*.zip.sha256" \
+            -o -name "*.whl" \) \
+            -exec cp {} release-files/ \;
+          echo "=== Release files ==="
+          ls -lh release-files/
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          chmod +x .github/scripts/extract-release-notes.sh
+          .github/scripts/extract-release-notes.sh "${{ needs.validate.outputs.version }}"
+
+      - name: Read release title
+        id: title
+        run: echo "title=$(cat release-title.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.title.outputs.title }}
+          body_path: release-notes.md
+          files: release-files/*
+          draft: false
+          # Semver prereleases ("v0.2.0-rc.1") are flagged so crates.io /
+          # PyPI publish jobs skip them — see their `if:` guards below.
+          prerelease: ${{ contains(needs.validate.outputs.version, '-') }}
+          fail_on_unmatched_files: false
+
+  # ---------------------------------------------------------------------------
+  # Publish the Rust crate to crates.io
+  # ---------------------------------------------------------------------------
+  # Olgadoc's Cargo.toml uses a path dependency on olga, so we *only* publish
+  # the root ``olga`` crate — olgadoc is distributed as a Python wheel, not a
+  # crates.io crate.
+  publish-crates:
+    name: publish -> crates.io
+    needs: [validate, create-release]
+    runs-on: ubuntu-latest
+    if: ${{ !contains(needs.validate.outputs.version, '-') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Dry run (catches broken metadata before the real publish)
+        run: cargo publish -p olga --dry-run
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+
+      - name: cargo publish -p olga
+        run: cargo publish -p olga
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Publish Python wheels + sdist to PyPI via Trusted Publishing
+  # ---------------------------------------------------------------------------
+  # Uses PyPI's OIDC flow — no long-lived API token stored in GitHub. The
+  # project must be configured on PyPI to accept uploads from this repository
+  # and this workflow filename. See:
+  #   https://docs.pypi.org/trusted-publishers/
+  publish-pypi:
+    name: publish -> PyPI
+    needs:
+      - validate
+      - build-python-wheels
+      - build-python-wheels-musl
+      - build-sdist
+      - create-release
+    runs-on: ubuntu-latest
+    if: ${{ !contains(needs.validate.outputs.version, '-') }}
+    # Environment name matches the Trusted Publishing configuration on PyPI.
+    # Use the same string when registering the publisher.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/olgadoc/
+    permissions:
+      # Required for OIDC Trusted Publishing. ``contents`` is inherited from
+      # the workflow-level ``permissions`` above but must be declared here to
+      # avoid the job falling back to the least-privilege default.
+      id-token: write
+    steps:
+      - name: Download wheel + sdist artefacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: "{wheels-*,sdist}"
+          merge-multiple: true
+
+      - name: Inspect dist
+        run: |
+          echo "=== Files to publish ==="
+          ls -lh dist/
+
+      - name: Upload to PyPI (Trusted Publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          skip-existing: true

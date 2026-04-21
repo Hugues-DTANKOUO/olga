@@ -1,0 +1,111 @@
+name: Bug report
+description: Report incorrect or unexpected behaviour in Olga or olgadoc.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. The more concrete the
+        repro the faster we can fix it — a 5-line code sample plus a small
+        sample document beats a paragraph of prose every time.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's wrong
+      description: A short, plain-language description of what you saw vs. what you expected.
+      placeholder: "When I run `olga foo.pdf` the output is missing the header on page 3..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or code. Include the input file if you can share it.
+      placeholder: |
+        1. Save the attached `repro.pdf`
+        2. Run `olga repro.pdf --format text`
+        3. Page 3 output is empty
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+      placeholder: "Page 3 should contain the table starting with `Q1 2024`..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Paste the actual output, the error message, or the diff against expected.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: document-info
+    attributes:
+      label: Source document (if applicable)
+      description: |
+        If the bug is tied to a specific input, please share what you can.
+        For PDFs we especially care about: page count, encryption, scanned
+        vs. native, presence of forms, embedded fonts.
+      placeholder: |
+        - Format: PDF 1.7
+        - Pages: 12
+        - Encryption: none
+        - Native or scanned: native
+        - Can you attach the file? (yes / redacted / no)
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      value: |
+        - **OS**: (e.g. Ubuntu 24.04, macOS 14.4, Windows 11)
+        - **Olga version**: (output of `olga --version`)
+        - **Rust toolchain** (if building from source): (output of `rustc --version`)
+        - **Python version** (if using olgadoc): (output of `python --version`)
+        - **olgadoc version** (if using Python): (output of `python -c "import olgadoc; print(olgadoc.__version__)"`)
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Minimal code sample (optional)
+      render: rust
+      placeholder: |
+        use olga::Document;
+        let doc = Document::open("repro.pdf")?;
+        let text = doc.to_text();
+        // text on page 3 is empty
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (optional)
+      description: Run with `RUST_LOG=debug` and paste anything relevant.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for duplicates
+          required: true
+        - label: I'm running a recent version of Olga / olgadoc
+          required: false

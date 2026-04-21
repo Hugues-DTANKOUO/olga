@@ -1,0 +1,41 @@
+Olga — Intelligent Document Processing
+Copyright 2026 Hugues Tankouo
+
+This product includes software developed at Anthropic's
+tooling community and by the broader open-source ecosystem.
+
+------------------------------------------------------------
+
+This product contains test fixtures transliterated from Apache POI
+(https://poi.apache.org/), an open-source Java library developed by
+the Apache Software Foundation and licensed under the Apache License,
+Version 2.0. The affected files are:
+
+  - src/formats/xlsx/number_format/poi_fixtures.rs
+
+These fixtures preserve the structure and expected values of POI's
+`TestDataFormatter` so Olga's XLSX number-format engine can be measured
+against the same empirical corpus. See ATTRIBUTION.md for the full
+scope note.
+
+Apache POI
+Copyright 2003-2025 The Apache Software Foundation
+
+This product also contains test fixtures transliterated from SheetJS
+SSF (https://github.com/SheetJS/ssf), an open-source JavaScript number-
+format library licensed under the Apache License, Version 2.0. The
+affected files are:
+
+  - src/formats/xlsx/number_format/ssf_fixtures.rs
+
+SheetJS SSF
+Copyright (C) 2013-present SheetJS LLC
+
+------------------------------------------------------------
+
+The rendering code itself (the number-format parser, section splitter,
+and per-kind formatters under `src/formats/xlsx/number_format/`) is an
+independent Rust implementation, written from scratch against the
+ECMA-376 specification (§18.8.30) and aligned on the observable
+contract of the above reference implementations — not a line-by-line
+translation of their source.

@@ -1,0 +1,59 @@
+# Dependabot configuration — keeps Rust crates, GitHub Actions, and Python
+# packaging deps current with weekly PRs.
+#
+# Each ecosystem opens at most 5 PRs at a time so we can triage them in
+# batches without flooding the queue.
+version: 2
+updates:
+  # Rust crates — workspace root covers both `olga` and the `olgadoc` member.
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "rust"
+    open-pull-requests-limit: 5
+
+  # GitHub Actions — pins for actions used by ci.yml / docs.yml / release.yml.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+      - "ci"
+    open-pull-requests-limit: 5
+
+  # Python — `olgadoc/pyproject.toml` (runtime) and `docs-requirements.txt`
+  # (mkdocs site). One ecosystem entry per directory because Dependabot
+  # treats them as independent dependency manifests.
+  - package-ecosystem: "pip"
+    directory: "/olgadoc"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "python"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(docs)"
+    labels:
+      - "dependencies"
+      - "docs"
+    open-pull-requests-limit: 3

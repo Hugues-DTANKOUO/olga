@@ -1,0 +1,59 @@
+[workspace]
+members = ["olgadoc"]
+
+[package]
+name = "olga"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Four formats, one engine. PDF, DOCX, XLSX, HTML → Markdown and typed JSON. 15–40× faster than equivalent-quality OSS tools, with pipeline pre-flight and element-level provenance."
+authors = ["Hugues Tankouo <huguesdtankouo@gmail.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/Hugues-DTANKOUO/olga"
+readme = "README.md"
+# crates.io caps keywords at 5 — picked for reach on the
+# document-extraction / RAG / IDP audience.
+keywords = ["pdf", "docx", "xlsx", "rag", "markdown"]
+categories = ["parser-implementations", "text-processing"]
+
+[lib]
+name = "olga"
+path = "src/lib.rs"
+
+[[bin]]
+name = "olga"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+unicode-normalization = "0.1"
+quick-xml = "0.39"
+zip = { version = "8", default-features = false, features = ["deflate"] }
+calamine = { version = "0.34", features = ["dates"] }
+ego-tree = "0.11"
+scraper = "0.26"
+pdf_oxide = "0.3.36"
+log = "0.4"
+thiserror = "2"
+rstar = "0.12"
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
+proptest = "1"
+env_logger = "0.11"
+criterion = { version = "0.5", features = ["html_reports"] }
+assert_cmd = "2"
+predicates = "3"
+
+[[bench]]
+name = "layout_bench"
+harness = false
+
+[[bench]]
+name = "pipeline_bench"
+harness = false
+
+[[bench]]
+name = "table_bench"
+harness = false

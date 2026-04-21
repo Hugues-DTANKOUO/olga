@@ -1,0 +1,90 @@
+# cargo-deny configuration
+# https://embarkstudios.github.io/cargo-deny/
+#
+# Olga ships under Apache-2.0, so we only need to allow license codes that
+# are downstream-compatible with a permissive Apache-2.0 distribution. The
+# advisories section blocks crates with active RUSTSEC entries or that have
+# been yanked from crates.io; the bans section forbids unknown registries
+# and warns on duplicate transitive versions of the same crate.
+
+[graph]
+# Include all targets when resolving the dep tree. Without this, a vuln in
+# a Windows-only or musl-only target could slip past CI on Linux runners.
+all-features = true
+
+[advisories]
+version = 2
+# `unmaintained` flips noisy on transitive deps that the ecosystem hasn't
+# replaced yet — keep informational so we see the warning in CI without
+# failing the build on ecosystem inertia.
+unmaintained = "workspace"
+yanked = "deny"
+ignore = []
+
+[licenses]
+version = 2
+# Confidence threshold for SPDX detection: the default 0.8 occasionally
+# misses commented headers — bumping to 0.93 forces high-confidence matches
+# and surfaces anything that needs explicit clarification below.
+confidence-threshold = 0.93
+# Only allow SPDX codes we actually encounter in the resolved graph. When
+# `cargo deny check` flags a new license as not-allowed, we audit it and
+# add it here with intent rather than pre-loading a wide allowlist.
+allow = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    # MPL-2.0 is weak copyleft scoped to the modified files only — safe to
+    # consume from a permissive Apache-2.0 distribution.
+    "MPL-2.0",
+]
+
+[[licenses.clarify]]
+# `ring` ships with a custom OpenSSL/ISC/MIT triple that older SPDX
+# detectors mis-parse. Pin the canonical license expression so the build
+# stays deterministic if `ring` ever winds up in our tree transitively.
+crate = "ring"
+expression = "MIT AND ISC AND OpenSSL"
+license-files = [{ path = "LICENSE", hash = 0xbd0eed23 }]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+deny = [
+    # OpenSSL pulls in C deps and a non-permissive license clause. We use
+    # rustls-equivalent paths or pure-Rust crates everywhere that matters.
+    { name = "openssl" },
+    { name = "openssl-sys" },
+]
+# Acknowledged duplicates — each entry pins the *older* side of a known
+# upstream version skew so any *new* duplicate still surfaces as a warning.
+# Revisit when the listed transitive consumer publishes a bump.
+skip = [
+    # calamine 0.34 still pulls zip 7; olga uses zip 8 directly for its
+    # own XLSX/DOCX packaging. Drops when calamine bumps past 0.34.
+    { crate = "zip@7.2.0", reason = "calamine 0.34 → zip 7; olga uses zip 8 directly" },
+    # pdf_oxide 0.3.36 pulls tiff 0.11 directly *and* image 0.24 → tiff 0.9.
+    # Drops when pdf_oxide consolidates its image decoders.
+    { crate = "tiff@0.9.1", reason = "image 0.24 → tiff 0.9; pdf_oxide also pulls tiff 0.11 directly" },
+    # Same pdf_oxide → image 0.24 path pulls png 0.17 → bitflags 1. Olga's
+    # other direct/transitive deps all use bitflags 2. Drops with the
+    # image 0.24 consolidation above.
+    { crate = "bitflags@1.3.2", reason = "image 0.24 → png 0.17 → bitflags 1; everywhere else is bitflags 2" },
+    # wit-bindgen shows up twice on WASI targets only: getrandom 0.3
+    # (via rand 0.9) → wit-bindgen 0.57, getrandom 0.4 (via tempfile /
+    # uuid) → wit-bindgen 0.51. Zero code impact on our native targets
+    # (cfg-gated to WASI). Drops when getrandom 0.4 bumps to wit-bindgen 0.57.
+    { crate = "wit-bindgen@0.51.0", reason = "getrandom 0.4 → wit-bindgen 0.51; WASI-only, cfg-gated" },
+]
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

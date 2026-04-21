@@ -1,0 +1,98 @@
+site_name: Olga
+site_description: Four formats, one engine. PDF, DOCX, XLSX, HTML → Markdown and typed JSON, 15–40× faster than equivalent-quality OSS. Rust core with strictly-typed Python bindings.
+site_url: https://hugues-dtankouo.github.io/olga/
+repo_url: https://github.com/Hugues-DTANKOUO/olga
+repo_name: Hugues-DTANKOUO/olga
+edit_uri: edit/main/docs/
+
+# Keep the published site in the ``site/`` directory, clearly separate from
+# both ``docs/`` (source) and ``docs-dev/`` (internal design notes).
+site_dir: site
+
+theme:
+  name: material
+  custom_dir: overrides
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle: { icon: material/weather-sunny, name: Switch to dark mode }
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle: { icon: material/weather-night, name: Switch to light mode }
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          # Render straight from the installed package — picks up the live
+          # docstrings in ``olgadoc/__init__.py`` and the ``.pyi`` stub.
+          paths: [olgadoc/python]
+          options:
+            docstring_style: google
+            docstring_section_style: table
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            members_order: source
+            separate_signature: true
+            merge_init_into_class: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            filters:
+              - "!^_"  # hide private members
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      # Enables the ``--8<-- "path"`` syntax for embedding external files
+      # (example sources, CHANGELOG.md, CONTRIBUTING.md).
+      base_path: [".", "docs"]
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+extra:
+  # Canonical Open Graph / Twitter card image — surfaced by
+  # overrides/main.html on every published page. Regenerate the PNG from
+  # docs/assets/og-image.html (see docs-dev/STYLE.md).
+  og_image: https://hugues-dtankouo.github.io/olga/assets/og-image.png
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - API reference:
+      - Overview: api/index.md
+      - Document: api/document.md
+      - Page: api/page.md
+      - Processability: api/processability.md
+      - Payloads: api/payloads.md
+      - JSON tree: api/json_tree.md
+  - Examples:
+      - Overview: examples/index.md
+      - Quickstart: examples/quickstart.md
+      - Extract tables: examples/extract_tables.md
+      - Batch processability: examples/batch_processability.md
+      - Search and extract: examples/search_and_extract.md
+      - JSON walk: examples/json_walk.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md

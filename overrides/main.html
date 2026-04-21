@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{#
+  Inject Open Graph and Twitter card meta tags on every page.
+
+  Uses the per-page ``title`` / ``description`` exposed by MkDocs
+  (falling back to the site-level values declared in ``mkdocs.yml``)
+  and the canonical OG image pinned under ``extra.og_image``.
+
+  Regenerate the PNG from ``docs/assets/og-image.html`` — the source
+  lives alongside the rendered image for easy iteration.
+#}
+{% block extrahead %}
+  {% if page and page.meta and page.meta.title %}
+    {% set og_title = page.meta.title %}
+  {% elif page and page.is_homepage %}
+    {% set og_title = config.site_name %}
+  {% elif page and page.title %}
+    {% set og_title = page.title ~ " · " ~ config.site_name %}
+  {% else %}
+    {% set og_title = config.site_name %}
+  {% endif %}
+  {% set og_description = page.meta.description if page and page.meta and page.meta.description
+                          else config.site_description %}
+  {% set og_url = page.canonical_url if page and page.canonical_url else config.site_url %}
+  {% set og_image = config.extra.og_image %}
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ og_title }}">
+  <meta property="og:description" content="{{ og_description }}">
+  <meta property="og:url" content="{{ og_url }}">
+  <meta property="og:image" content="{{ og_image }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Olga — 15–40× faster document extraction across PDF, DOCX, XLSX, and HTML">
+  <meta property="og:site_name" content="{{ config.site_name }}">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ og_title }}">
+  <meta name="twitter:description" content="{{ og_description }}">
+  <meta name="twitter:image" content="{{ og_image }}">
+  <meta name="twitter:image:alt" content="Olga — 15–40× faster document extraction across PDF, DOCX, XLSX, and HTML">
+{% endblock %}
