@@ -1,0 +1,20 @@
+Test,olgadoc,calamine,openpyxl
+1. 0.15 + '0%'        → '15%',✓,raw,raw
+"1. 1234.5 + '#,##0.00'→ '1,234.50'",✓,raw,raw
+1. 7 + '000'          → '007',✓,raw,raw
+1. 0.5 + '# ?/?'      → '1/2',✓,raw,raw
+"1. 1234.56 + '""$""…'    → '$1,234.56'",✓,raw,raw
+1. 0.99999 + '0.00%'  → '100.00%',✓,raw,raw
+1. 1.2345e-05         → '1.23E-05',✓,raw,raw
+2. Duration 49h30m    → '49:30',✓,✓,✓
+3. Merged region replicates across rows,once,once,once
+4. Hyperlink URL attached to its label,✓ near,✓ near,✓ near
+5. Cell comment 'Marlow-Chen' surfaces,✓,✗,✗
+7. Intra-cell newlines preserved,✓,✓,✓
+10. '#DIV/0!' surfaces,✓,✗,✓
+10. '#N/A' surfaces,✓,✗,✓
+11. Named range 'MyTotal' surfaces,✗,✗,✗
+12. Hidden row leaks into output,leaks,leaks,leaks
+12. Hidden column leaks,leaks,leaks,leaks
+13. VeryHidden sheet leaks,leaks,leaks,leaks
+14. Data-validation values surface,✗,✗,✗

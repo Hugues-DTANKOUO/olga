@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deep Dive: Rust Ownership — TechBlog</title>
+<meta name="description" content="An illustrated walkthrough of Rust's ownership model.">
+<style>.nav{background:#222;color:#fff}.sidebar{float:right;width:30%}</style>
+</head>
+<body>
+<nav class="nav">
+  <ul><li><a href="/">Home</a></li><li><a href="/archive">Archive</a></li><li><a href="/about">About</a></li></ul>
+</nav>
+
+<aside class="sidebar">
+  <h3>Related</h3>
+  <ul>
+    <li><a href="/posts/lifetimes">Understanding Lifetimes</a></li>
+    <li><a href="/posts/borrow-checker">The Borrow Checker Explained</a></li>
+  </ul>
+  <div class="ad">
+    <p>Sponsored: <a href="https://example.com">Get the Rust Cookbook</a></p>
+  </div>
+</aside>
+
+<main>
+<article>
+<h1>Deep Dive: Rust Ownership</h1>
+<p class="byline">By <a href="/author/jane">Jane Doe</a> · Published 12 March 2026 · 8&nbsp;min read</p>
+
+<p>Rust's ownership model is what makes it <em>unique</em> among systems languages. In this article we'll
+walk through the three rules, with examples.</p>
+
+<h2>The Three Rules</h2>
+<ol>
+  <li>Each value has a single <strong>owner</strong>.</li>
+  <li>When the owner goes out of scope, the value is <strong>dropped</strong>.</li>
+  <li>You can have <em>either</em>
+    <ul>
+      <li>one mutable reference, <strong>or</strong></li>
+      <li>any number of immutable references</li>
+    </ul>
+    — but never both at the same time.</li>
+</ol>
+
+<h2>A First Example</h2>
+<p>Consider this code:</p>
+<pre><code class="language-rust">fn main() {
+    let s = String::from("hello");
+    takes_ownership(s);
+}
+
+fn takes_ownership(s: String) {
+    println!("{}", s);
+}</code></pre>
+
+<h2>Comparison Table</h2>
+<table>
+  <thead>
+    <tr><th>Operation</th><th>Stack</th><th>Heap</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Copy</td><td>implicit (<code>Copy</code>)</td><td>requires <code>.clone()</code></td><td>primitive types only on stack</td></tr>
+    <tr><td>Move</td><td>—</td><td>invalidates source</td><td>default for <code>String</code>, <code>Vec</code>…</td></tr>
+    <tr><td>Borrow</td><td>cheap</td><td>cheap</td><td>checked at compile time</td></tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>"Ownership is Rust's most unique feature." — <cite>The Rust Book</cite></p>
+</blockquote>
+
+<h2>Leave a Comment</h2>
+<form action="/comment" method="post">
+  <label>Name: <input type="text" name="name" required></label>
+  <label>Comment: <textarea name="body"></textarea></label>
+  <button type="submit">Post</button>
+</form>
+</article>
+</main>
+
+<footer>
+  <p>&copy; 2026 TechBlog. <a href="/privacy">Privacy</a> · <a href="/tos">Terms</a></p>
+  <script>console.log("tracking")</script>
+</footer>
+</body>
+</html>

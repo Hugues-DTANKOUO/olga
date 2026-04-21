@@ -3,6 +3,12 @@
 > **Third-party technical evaluation — 2026-04.** Measured by an
 > independent engineer against 10+ open-source baselines on an
 > 11-document adversarial corpus, over 8 fix cycles.
+>
+> **See also:** a fully reproducible post-release audit of v0.1.0 lives
+> at [`olga_v0.1.0_benchmark/`](./olga_v0.1.0_benchmark/) — independent
+> fixtures, scripts, raw CSVs, and honest weakness list. Headline:
+> **1.62× faster and 2.62× more extracted content** than a hand-routed
+> best-of-breed pipeline on a 50-file mixed corpus.
 
 ## TL;DR
 

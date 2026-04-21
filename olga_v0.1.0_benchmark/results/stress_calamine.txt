@@ -1,0 +1,82 @@
+### 1-Formats
+Stored	Format code	What Excel displays (truth)
+0.15	0%	15%
+0.1234	0.00%	12.34%
+1234.5	#,##0.00	1,234.50
+1234567.0	#,##0	1,234,567
+-1234.5	#,##0.00;[Red](#,##0.00)	(1,234.50)
+1.2345e-05	0.00E+00	1.23E-05
+7.0	000	007
+0.5	# ?/?	1/2
+3.14159265	0.00	3.14
+1234.56	"$"#,##0.00	$1,234.56
+0.99999	0.00%	100.00%
+### 2-DatesTimes
+Kind	Stored value	Format	What Excel displays
+Date	2026-04-21	yyyy-mm-dd	2026-04-21
+Datetime	2026-04-21 14:30:00	yyyy-mm-dd hh:mm	2026-04-21 14:30
+Time	09:45:15	hh:mm:ss	09:45:15
+Duration 49h	2 days, 1:30:00	[h]:mm	49:30
+Old date	1900-03-01	yyyy-mm-dd	1900-03-01
+### 3-Merged
+Region	Product	Revenue		2x2 Header
+North America	Widget	1000.0		
+	Gadget	2000.0		
+	Gizmo	3000.0		
+EMEA	Widget	500.0		
+	Gadget	800.0		
+				
+GRAND TOTAL				
+### 4-Links
+Label	Target
+Our website	https://www.example.com
+Internal ref	#Sheet1!A1
+Email us	mailto:hello@example.com
+### 5-Comments
+Revenue Q1	12500000.0
+Headcount	42.0
+### 6-Styles
+Red text	Highlighted
+Bordered	
+### 7-LineBreaks
+Kind	Value
+LF in cell	line1
+line2
+line3
+Text with \r\n	before
+after
+### 8-Formulas
+Formula	Expected value
+	
+	
+	Depends on above
+	A1 of this sheet
+	
+### 9-Validation
+Status	Score
+Open	5.0
+Closed	10.0
+### 10-Conditional
+5.0
+10.0
+15.0
+20.0
+25.0
+30.0
+### 11-Hidden
+visible1	also visible	HIDDEN_COL_SECRET
+HIDDEN_ROW_SECRET		
+visible2		
+visible3		
+### 12-VeryHidden
+VERY_HIDDEN_CONTENT — should normally not surface in UI
+### 13-NamedRanges
+100.0	
+200.0	
+300.0	
+### 14-MessyHeader
+QUARTERLY REPORT — 2026			
+			
+Metric	Jan	Feb	Mar
+Revenue	1000.0	1200.0	1100.0
+Costs	800.0	900.0	950.0

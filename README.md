@@ -94,6 +94,12 @@ editorial conventions that no single OSS tool provides.
 **Full methodology, corpus, baselines, and known limitations:
 [BENCHMARKS.md](./BENCHMARKS.md)**
 
+A post-release independent audit of v0.1.0 — fully reproducible, with
+fixtures, scripts, and raw CSVs — lives at
+[`olga_v0.1.0_benchmark/`](./olga_v0.1.0_benchmark/). On a 50-file
+mixed-format corpus, olgadoc is **1.62× faster and extracts 2.62× more
+content** than a hand-routed best-of-breed pipeline.
+
 ## vs alternatives
 
 | | Olga | `pdfplumber` | `unstructured` | `docling` | Apache Tika |
@@ -168,6 +174,9 @@ olga/
 - **[Quickstart](./docs/quickstart.md)** — install, open, extract, search.
 - **[Benchmarks](./BENCHMARKS.md)** — third-party evaluation, full
   corpus, baselines, known limitations.
+- **[Independent v0.1.0 benchmark](./olga_v0.1.0_benchmark/)** —
+  post-release reproducible audit with fixtures, scripts, and CSV
+  results.
 - **[API reference](./docs/api/index.md)** — every class, method, and
   TypedDict payload, generated from live docstrings.
 - **[Examples](./olgadoc/examples/)** — five self-contained scripts:

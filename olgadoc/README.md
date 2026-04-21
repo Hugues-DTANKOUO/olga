@@ -45,8 +45,12 @@ for element in doc.to_json()["elements"]:
   same `Document` / `Page` surface. Stop juggling `pdfplumber` +
   `python-docx` + `openpyxl` + `BeautifulSoup`.
 - **Native speed.** PDF 4–8 ms · DOCX 2 ms · XLSX 1–12 ms · HTML 1–5 ms.
-  15–40× faster than the quality-equivalent tool on every format.
-  ([benchmarks](https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md))
+  15–40× faster than the quality-equivalent tool on every format
+  ([benchmarks](https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md)).
+  A post-release independent reproducible audit on a 50-file mixed
+  corpus finds olgadoc **1.62× faster and 2.62× richer in extracted
+  content** than a hand-routed best-of-breed pipeline
+  ([report](https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark)).
 - **Spatial fidelity, intact.** Tables stay tables. Columns stay
   columns. Figure captions stay next to their figures. Layout carries
   meaning, and Olga preserves it across the round-trip to Markdown or
@@ -131,6 +135,7 @@ pytest tests/ -q
 
 - **Source & docs** — [github.com/Hugues-DTANKOUO/olga](https://github.com/Hugues-DTANKOUO/olga)
 - **Benchmarks** — [BENCHMARKS.md](https://github.com/Hugues-DTANKOUO/olga/blob/main/BENCHMARKS.md)
+- **Independent v0.1.0 audit** — [olga_v0.1.0_benchmark/](https://github.com/Hugues-DTANKOUO/olga/tree/main/olga_v0.1.0_benchmark)
 - **API reference** — [hugues-dtankouo.github.io/olga](https://hugues-dtankouo.github.io/olga/api/)
 
 ## License
