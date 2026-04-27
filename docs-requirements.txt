@@ -2,6 +2,6 @@
 # Keep in sync with the ``docs`` job in ``.github/workflows/ci.yml`` when
 # we add one.
 mkdocs>=1.6,<2
-mkdocs-material>=9.5,<10
+mkdocs-material>=9.7.6,<10
 mkdocstrings[python]>=0.26,<1
 pymdown-extensions>=10.7,<11
