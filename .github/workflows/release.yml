@@ -435,12 +435,18 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
 
       - name: Dry run (catches broken metadata before the real publish)
-        run: cargo publish -p olga --dry-run
+        # `--locked` pins Cargo.lock for the publish + verify pass and
+        # surfaces a clear "the lock file needs to be updated" error if
+        # Cargo.lock ever drifts ; without it, cargo silently re-resolves
+        # transitive deps during the dry-run and dirties the working
+        # tree, which fails with the misleading "uncommitted changes"
+        # error (see v0.1.2 release post-mortem).
+        run: cargo publish -p olga --dry-run --locked
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
 
       - name: cargo publish -p olga
-        run: cargo publish -p olga
+        run: cargo publish -p olga --locked
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
 
