@@ -978,6 +978,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#012-2026-05-25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.2 — 2026-05-25
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.2 — 2026-05-25">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#downstream-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downstream impact
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#011-2026-04-21" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1061,6 +1122,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#012-2026-05-25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.2 — 2026-05-25
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.2 — 2026-05-25">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#downstream-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downstream impact
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#011-2026-04-21" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1109,6 +1231,30 @@ this project adheres to <a href="https://semver.org/">Semantic Versioning</a>.</
 <p>Starting with v0.2.0, each release will be documented with granular
 <code>Added</code> / <code>Changed</code> / <code>Fixed</code> / <code>Removed</code> / <code>Security</code> sections. v0.1.0
 is the single foundational cut that establishes the baseline.</p>
+<h2 id="012-2026-05-25"><a href="https://github.com/Hugues-DTANKOUO/olga/compare/v0.1.1...v0.1.2">0.1.2</a> — 2026-05-25<a class="headerlink" href="#012-2026-05-25" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>Per-format feature flags — opt-out binary size for downstream consumers (e.g. mobile surfaces).</p>
+</blockquote>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>[features]</code> block</strong> in <code>Cargo.toml</code> exposing 4 per-format feature flags : <code>xlsx</code> / <code>pdf</code> / <code>docx</code> / <code>html</code>. Default feature set is <code>["xlsx", "pdf", "docx", "html"]</code> — full backward compatibility with v0.1.1 behavior (no change for consumers who don't opt out).</li>
+<li>A private umbrella <code>_ooxml</code> feature that pulls in the shared <code>quick-xml</code> + <code>zip</code> deps that both DOCX and XLSX need ; gated transitively by <code>xlsx</code> and <code>docx</code> features. Consumers should NOT enable <code>_ooxml</code> directly.</li>
+<li>Compile-time feature-disabled error path : when a format's feature is opted out, <code>Document::open()</code> and the CLI <code>select_decoder()</code> dispatch return <code>IdpError::UnsupportedFormat</code> carrying a "feature disabled at compile time" message. The <code>Format</code> enum keeps all 4 variants visible so the public API stays stable across feature combinations.</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Format-specific dependencies are now <code>optional = true</code> in <code>Cargo.toml</code> :</li>
+<li><code>calamine</code> → gated by <code>xlsx</code></li>
+<li><code>pdf_oxide</code> → gated by <code>pdf</code></li>
+<li><code>scraper</code> + <code>ego-tree</code> → gated by <code>html</code></li>
+<li><code>quick-xml</code> + <code>zip</code> → gated by <code>_ooxml</code> (transitively by <code>xlsx</code> and <code>docx</code>)</li>
+<li>The PDF spatial renderer modules (<code>output::markdown</code> + <code>output::spatial</code> + <code>output::rules</code> + helpers <code>col_resolve</code> / <code>row_cluster</code>) are now cfg-gated on the <code>pdf</code> feature. These modules consume <code>pdf_oxide::layout::TextChar</code> directly and have no meaningful rendering path without PDF support.</li>
+<li>Integration test files (<code>tests/docx_tests.rs</code> / <code>tests/pdf_tests.rs</code> / <code>tests/xlsx_tests.rs</code> / <code>tests/html_tests.rs</code>) gated with <code>#![cfg(feature = "X")]</code> — disabled formats compile to an empty test-binary shell with zero tests.</li>
+</ul>
+<h3 id="compatibility">Compatibility<a class="headerlink" href="#compatibility" title="Permanent link">&para;</a></h3>
+<p>Fully backward-compatible with v0.1.1 for consumers using <code>olga = "0.1"</code> without explicit feature manipulation : the default feature set replicates v0.1.1's all-formats behavior verbatim. Consumers opting out of formats (e.g. <code>default-features = false, features = ["xlsx", "html"]</code>) gain measurable binary-size reduction.</p>
+<h3 id="downstream-impact">Downstream impact<a class="headerlink" href="#downstream-impact" title="Permanent link">&para;</a></h3>
+<p>Aliya's <code>crates/olga-bridge</code> (Chunk 3.1, ADR-0067) consumes this release to support its mobile-surface feature-flag discipline. The bridge propagates the 4 feature flags one-to-one so Aliya mobile builds can opt out of PDF + DOCX while keeping XLSX + HTML for the dominant onboarding flow (Excel catalog import + product-page web scraping).</p>
 <h2 id="011-2026-04-21"><a href="https://github.com/Hugues-DTANKOUO/olga/compare/v0.1.0...v0.1.1">0.1.1</a> — 2026-04-21<a class="headerlink" href="#011-2026-04-21" title="Permanent link">&para;</a></h2>
 <blockquote>
 <p>Docs patch — surface the independent v0.1.0 benchmark on PyPI and crates.io.</p>
