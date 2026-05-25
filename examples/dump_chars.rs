@@ -4,9 +4,24 @@
 //! Purpose: inspect how inter-word spaces are encoded in the PDF so we can
 //! diagnose whether double-spaces come from duplicate real-space glyphs,
 //! large TJ displacements, or other encoding choices.
+//!
+//! Per v0.1.2 [features] block : this example reaches into
+//! `pdf_oxide` directly (not via Olga's facade). When the `pdf`
+//! feature is disabled, `main()` falls through to a stub that
+//! prints a feature-disabled hint and exits with code 0.
 
+#[cfg(not(feature = "pdf"))]
+fn main() {
+    eprintln!(
+        "dump_chars: this example requires the `pdf` cargo feature.\n\
+         Rebuild with `cargo run --features pdf --example dump_chars -- <pdf> <page>`."
+    );
+}
+
+#[cfg(feature = "pdf")]
 use pdf_oxide::PdfDocument;
 
+#[cfg(feature = "pdf")]
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let path = args

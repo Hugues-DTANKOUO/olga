@@ -9,6 +9,12 @@
 //!     tests/corpus/pdf/structured_report.pdf \
 //!     tests/table_crossval/structured_report_ref.json
 //! ```
+//!
+//! Per v0.1.2 [features] block : this test binary uses
+//! `olga::formats::pdf::PdfDecoder` directly. Gated on the `pdf`
+//! feature ; when disabled, it compiles to an empty shell.
+
+#![cfg(feature = "pdf")]
 
 use std::collections::HashSet;
 use std::path::Path;

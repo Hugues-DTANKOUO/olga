@@ -1,6 +1,11 @@
 use ego_tree::NodeRef;
-use pdf_oxide::text::rtl_detector::is_rtl_text;
 use scraper::{ElementRef, Node};
+
+// Local RTL detector — previously `pdf_oxide::text::rtl_detector::is_rtl_text`,
+// which made `pdf_oxide` an implicit transitive dep of `html`. v0.1.2
+// gates `pdf_oxide` behind the optional `pdf` feature ; the
+// feature-agnostic detector now lives in `crate::model::rtl`.
+use crate::model::rtl::is_rtl_text;
 use unicode_normalization::UnicodeNormalization;
 
 use crate::model::{TextDirection, ValueOrigin};

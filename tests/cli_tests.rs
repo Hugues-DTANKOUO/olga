@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use assert_cmd::Command;
 use serde_json::Value;
 
+#[allow(dead_code)]
 fn corpus(path: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
@@ -19,6 +20,7 @@ fn corpus(path: &str) -> PathBuf {
 
 /// Run `olga` with the given args and parse stdout as JSON. Panics with the
 /// full output on failure so diagnostics are visible in CI.
+#[allow(dead_code)]
 fn run_json(args: &[&str]) -> Value {
     let output = Command::cargo_bin("olga")
         .expect("olga binary must build")
@@ -40,6 +42,7 @@ fn run_json(args: &[&str]) -> Value {
 // inspect
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn inspect_emits_enriched_metadata_with_health_report() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -67,6 +70,7 @@ fn inspect_emits_enriched_metadata_with_health_report() {
     assert!(counts["pages_with_content"].as_u64().is_some());
 }
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn inspect_for_every_format_reports_health() {
     for path in [
@@ -90,6 +94,7 @@ fn inspect_for_every_format_reports_health() {
 // search
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn search_returns_hits_with_snippets() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -114,6 +119,7 @@ fn search_returns_hits_with_snippets() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn search_limit_truncates_hits_but_keeps_total_before_limit() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -133,6 +139,7 @@ fn search_limit_truncates_hits_but_keeps_total_before_limit() {
     );
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn search_page_filter_restricts_to_that_page() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -143,6 +150,7 @@ fn search_page_filter_restricts_to_that_page() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn search_empty_query_returns_no_hits() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -155,6 +163,7 @@ fn search_empty_query_returns_no_hits() {
 // pages
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pages_summary_lists_every_page_with_char_counts() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -172,6 +181,7 @@ fn pages_summary_lists_every_page_with_char_counts() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pages_single_page_emits_rendered_text() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -191,6 +201,7 @@ fn pages_single_page_emits_rendered_text() {
     assert!(!body.trim().is_empty(), "page 1 must have content");
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pages_out_of_range_fails_with_nonzero_exit() {
     let pdf = corpus("pdf/structured_report.pdf");
@@ -211,6 +222,7 @@ fn pages_out_of_range_fails_with_nonzero_exit() {
 // non-regression: default process command still works
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn default_process_command_still_produces_json() {
     let pdf = corpus("pdf/structured_report.pdf");

@@ -18,12 +18,24 @@ use std::sync::{Arc, OnceLock};
 use serde_json::Value;
 
 use crate::error::{IdpError, IdpResult, Warning};
+// Format decoder imports — each gated behind its respective cargo
+// feature per v0.1.2 `[features]` block. The `decoder_for` dispatch
+// table below returns `IdpError::UnsupportedFormat` carrying a
+// "feature disabled" message for any format whose feature is
+// disabled at compile time.
+#[cfg(feature = "docx")]
 use crate::formats::docx::DocxDecoder;
+#[cfg(feature = "html")]
 use crate::formats::html::HtmlDecoder;
+#[cfg(feature = "pdf")]
 use crate::formats::pdf::PdfDecoder;
+#[cfg(feature = "xlsx")]
 use crate::formats::xlsx::XlsxDecoder;
 use crate::model::{DocumentMetadata, ExtractedImage, Primitive};
-use crate::output::{self, markdown as md_render, prim_spatial, spatial};
+use crate::output::{self, prim_spatial};
+// PDF spatial renderers — gated on the `pdf` feature per v0.1.2.
+#[cfg(feature = "pdf")]
+use crate::output::{markdown as md_render, spatial};
 use crate::structure::{StructureConfig, StructureEngine, StructureResult};
 use crate::traits::{DecodeResult, FormatDecoder};
 
@@ -518,7 +530,14 @@ impl DocumentInner {
 
     fn render_by_page(&self, kind: RenderKind) -> BTreeMap<usize, String> {
         match self.format {
+            #[cfg(feature = "pdf")]
             Format::Pdf => render_pdf_by_page(&self.data, kind),
+            // PDF feature disabled — return an empty map ; the
+            // decoder_for() dispatch already errors out when the
+            // file is actually opened, so reaching here with
+            // Format::Pdf + `pdf` off is a defensive no-op.
+            #[cfg(not(feature = "pdf"))]
+            Format::Pdf => BTreeMap::new(),
             Format::Docx | Format::Xlsx => match self.decode() {
                 Ok(dr) => render_primitives_by_page(&dr.primitives, &dr.metadata, kind),
                 Err(_) => BTreeMap::new(),
@@ -543,10 +562,30 @@ enum RenderKind {
 
 fn decoder_for(format: Format) -> IdpResult<Box<dyn FormatDecoder>> {
     match format {
+        #[cfg(feature = "pdf")]
         Format::Pdf => Ok(Box::new(PdfDecoder)),
+        #[cfg(not(feature = "pdf"))]
+        Format::Pdf => Err(IdpError::UnsupportedFormat(
+            "PDF decoder disabled at compile time (feature `pdf` not enabled)".to_string(),
+        )),
+        #[cfg(feature = "docx")]
         Format::Docx => Ok(Box::new(DocxDecoder)),
+        #[cfg(not(feature = "docx"))]
+        Format::Docx => Err(IdpError::UnsupportedFormat(
+            "DOCX decoder disabled at compile time (feature `docx` not enabled)".to_string(),
+        )),
+        #[cfg(feature = "xlsx")]
         Format::Xlsx => Ok(Box::new(XlsxDecoder)),
+        #[cfg(not(feature = "xlsx"))]
+        Format::Xlsx => Err(IdpError::UnsupportedFormat(
+            "XLSX decoder disabled at compile time (feature `xlsx` not enabled)".to_string(),
+        )),
+        #[cfg(feature = "html")]
         Format::Html => Ok(Box::new(HtmlDecoder)),
+        #[cfg(not(feature = "html"))]
+        Format::Html => Err(IdpError::UnsupportedFormat(
+            "HTML decoder disabled at compile time (feature `html` not enabled)".to_string(),
+        )),
         Format::Other(id) => Err(IdpError::UnsupportedFormat(format!(
             "unknown format id {id}"
         ))),
@@ -562,6 +601,11 @@ fn decode_for(format: Format, data: Vec<u8>) -> IdpResult<DecodeResult> {
 }
 
 /// Render PDF text / markdown per page using the char-level spatial pipeline.
+///
+/// Gated on the `pdf` feature ; the dispatch in `render_by_page` returns
+/// an empty `BTreeMap` when `pdf` is off (the actual decoder-open path
+/// already errors out earlier via `decoder_for`).
+#[cfg(feature = "pdf")]
 fn render_pdf_by_page(data: &[u8], kind: RenderKind) -> BTreeMap<usize, String> {
     let mut out = BTreeMap::new();
     match kind {

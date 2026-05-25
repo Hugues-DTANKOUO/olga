@@ -8,6 +8,7 @@
 use super::*;
 use std::path::PathBuf;
 
+#[allow(dead_code)]
 fn corpus(path: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
@@ -25,12 +26,14 @@ fn detects_pdf_from_magic_bytes() {
     assert_eq!(detect_format(&data).unwrap(), Format::Pdf);
 }
 
+#[cfg(any(feature = "docx", feature = "xlsx"))]
 #[test]
 fn detects_docx_from_zip_layout() {
     let data = std::fs::read(corpus("docx/project_status.docx")).unwrap();
     assert_eq!(detect_format(&data).unwrap(), Format::Docx);
 }
 
+#[cfg(any(feature = "docx", feature = "xlsx"))]
 #[test]
 fn detects_xlsx_from_zip_layout() {
     let data = std::fs::read(corpus("xlsx/employee_directory.xlsx")).unwrap();
@@ -56,6 +59,7 @@ fn detect_format_rejects_unknown_bytes() {
 // Constructor: Document::open
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn opens_pdf_from_path() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -64,6 +68,7 @@ fn opens_pdf_from_path() {
     assert!(doc.is_processable());
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn opens_docx_from_path() {
     let doc = Document::open(corpus("docx/project_status.docx")).unwrap();
@@ -71,6 +76,7 @@ fn opens_docx_from_path() {
     assert!(doc.page_count() >= 1);
 }
 
+#[cfg(feature = "xlsx")]
 #[test]
 fn opens_xlsx_from_path() {
     let doc = Document::open(corpus("xlsx/employee_directory.xlsx")).unwrap();
@@ -78,6 +84,7 @@ fn opens_xlsx_from_path() {
     assert!(doc.page_count() >= 1);
 }
 
+#[cfg(feature = "html")]
 #[test]
 fn opens_html_from_path() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -90,6 +97,7 @@ fn opens_html_from_path() {
 // Constructor: Document::open_bytes
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn opens_bytes_without_hint_uses_sniffing() {
     let data = std::fs::read(corpus("pdf/structured_report.pdf")).unwrap();
@@ -97,6 +105,7 @@ fn opens_bytes_without_hint_uses_sniffing() {
     assert_eq!(doc.format(), Format::Pdf);
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn opens_bytes_with_explicit_hint() {
     let data = std::fs::read(corpus("docx/project_status.docx")).unwrap();
@@ -108,6 +117,7 @@ fn opens_bytes_with_explicit_hint() {
 // Pages
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pages_are_one_based() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -119,6 +129,7 @@ fn pages_are_one_based() {
     assert!(doc.page(doc.page_count() + 1).is_none());
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pages_iterator_covers_all_pages() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -131,6 +142,7 @@ fn pages_iterator_covers_all_pages() {
 // Text / Markdown
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn text_by_page_is_one_based_and_nonempty_for_pdf() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -143,6 +155,7 @@ fn text_by_page_is_one_based_and_nonempty_for_pdf() {
     assert_eq!(*by_page.keys().next().unwrap(), 1);
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn page_text_matches_document_text_by_page() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -158,6 +171,7 @@ fn page_text_matches_document_text_by_page() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn markdown_by_page_is_one_based_for_pdf() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -167,6 +181,7 @@ fn markdown_by_page_is_one_based_for_pdf() {
     }
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn docx_text_by_page_covers_pages() {
     let doc = Document::open(corpus("docx/project_status.docx")).unwrap();
@@ -177,6 +192,7 @@ fn docx_text_by_page_covers_pages() {
     }
 }
 
+#[cfg(feature = "html")]
 #[test]
 fn html_always_has_single_page_entry() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -192,6 +208,7 @@ fn html_always_has_single_page_entry() {
 // JSON / outline
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "docx")]
 #[test]
 fn to_json_returns_object_with_expected_top_level_keys() {
     let doc = Document::open(corpus("docx/project_status.docx")).unwrap();
@@ -201,6 +218,7 @@ fn to_json_returns_object_with_expected_top_level_keys() {
     assert!(obj.contains_key("root") || obj.contains_key("document") || !obj.is_empty());
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn outline_is_collected_in_document_order() {
     let doc = Document::open(corpus("docx/project_status.docx")).unwrap();
@@ -221,6 +239,7 @@ fn outline_is_collected_in_document_order() {
 // Images — dedicated channel
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pdf_exposes_images_channel() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -236,6 +255,7 @@ fn pdf_exposes_images_channel() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn page_images_filter_matches_document_images() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -254,6 +274,7 @@ fn page_images_filter_matches_document_images() {
     }
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn docx_images_mirror_primitive_images() {
     // DOCX fixture with inline media.
@@ -271,6 +292,7 @@ fn docx_images_mirror_primitive_images() {
     assert_eq!(seen, doc.image_count());
 }
 
+#[cfg(feature = "html")]
 #[test]
 fn html_single_page_images_filter_to_page_1() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -283,6 +305,7 @@ fn html_single_page_images_filter_to_page_1() {
     }
 }
 
+#[cfg(feature = "xlsx")]
 #[test]
 fn xlsx_has_no_images_in_v1() {
     let doc = Document::open(corpus("xlsx/employee_directory.xlsx")).unwrap();
@@ -298,6 +321,7 @@ fn xlsx_has_no_images_in_v1() {
 // Non-regression: images channel must NOT mutate text / markdown / JSON output
 // ---------------------------------------------------------------------------
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn images_channel_is_non_invasive_for_text_and_markdown() {
     // Brick B promise: within a single Document, forcing the images channel
@@ -340,6 +364,7 @@ fn images_channel_is_non_invasive_for_text_and_markdown() {
 // Links — document + per-page
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "html")]
 #[test]
 fn html_exposes_hyperlinks_from_anchor_tags() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -357,6 +382,7 @@ fn html_exposes_hyperlinks_from_anchor_tags() {
     assert_eq!(doc_total, page_total);
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn docx_exposes_hyperlinks_when_present() {
     let doc = Document::open(corpus("docx/project_status.docx")).unwrap();
@@ -368,6 +394,7 @@ fn docx_exposes_hyperlinks_when_present() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn pdf_link_coalescing_is_deterministic() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -378,6 +405,7 @@ fn pdf_link_coalescing_is_deterministic() {
     assert_eq!(a, b);
 }
 
+#[cfg(feature = "html")]
 #[test]
 fn page_links_are_a_subset_of_document_links() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -399,6 +427,7 @@ fn page_links_are_a_subset_of_document_links() {
 // Tables — document + per-page
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "xlsx")]
 #[test]
 fn xlsx_sheets_expose_at_least_one_table_per_sheet() {
     let doc = Document::open(corpus("xlsx/employee_directory.xlsx")).unwrap();
@@ -428,6 +457,7 @@ fn xlsx_sheets_expose_at_least_one_table_per_sheet() {
     }
 }
 
+#[cfg(feature = "docx")]
 #[test]
 fn docx_tables_carry_cells() {
     let doc = Document::open(corpus("docx/mixed_content_stress.docx")).unwrap();
@@ -437,6 +467,7 @@ fn docx_tables_carry_cells() {
     }
 }
 
+#[cfg(feature = "xlsx")]
 #[test]
 fn cross_page_table_shows_on_every_page_it_covers() {
     let doc = Document::open(corpus("xlsx/employee_directory.xlsx")).unwrap();
@@ -456,6 +487,7 @@ fn cross_page_table_shows_on_every_page_it_covers() {
     }
 }
 
+#[cfg(feature = "xlsx")]
 #[test]
 fn document_table_count_matches_tables_len() {
     let doc = Document::open(corpus("xlsx/employee_directory.xlsx")).unwrap();
@@ -466,6 +498,7 @@ fn document_table_count_matches_tables_len() {
 // Search — document + per-page
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "html")]
 #[test]
 fn empty_query_returns_no_hits() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -475,6 +508,7 @@ fn empty_query_returns_no_hits() {
     }
 }
 
+#[cfg(feature = "html")]
 #[test]
 fn search_is_case_insensitive() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -496,6 +530,7 @@ fn search_is_case_insensitive() {
     assert_eq!(a.len(), b.len());
 }
 
+#[cfg(feature = "html")]
 #[test]
 fn search_hit_coordinates_point_to_the_right_line() {
     let doc = Document::open(corpus("html/complex_report.html")).unwrap();
@@ -529,6 +564,7 @@ fn search_hit_coordinates_point_to_the_right_line() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn page_search_restricts_to_that_page() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -550,6 +586,7 @@ fn page_search_restricts_to_that_page() {
 // Chunks — document + per-page
 // ---------------------------------------------------------------------------
 
+#[cfg(feature = "pdf")]
 #[test]
 fn chunks_by_page_pairs_up_with_text_by_page() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -576,6 +613,7 @@ fn chunks_by_page_pairs_up_with_text_by_page() {
     assert_eq!(non_empty_pages, chunk_pages);
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn page_chunk_matches_document_chunks() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -595,6 +633,7 @@ fn page_chunk_matches_document_chunks() {
 // Non-regression: Brick C exposures are non-mutating on cached renderers
 // ---------------------------------------------------------------------------
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn brick_c_accessors_are_non_invasive() {
     // Mirror of the images-channel test from Brick B. Calling the new
@@ -636,6 +675,7 @@ fn brick_c_accessors_are_non_invasive() {
 
 /// Name a `HealthIssue` variant without its payload, so we can compare kinds
 /// for uniqueness (the deterministic emission contract).
+#[allow(dead_code)]
 fn health_issue_kind(issue: &HealthIssue) -> &'static str {
     match issue {
         HealthIssue::Encrypted => "Encrypted",
@@ -656,6 +696,7 @@ fn health_issue_kind(issue: &HealthIssue) -> &'static str {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn processability_pdf_is_not_blocked() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -667,6 +708,7 @@ fn processability_pdf_is_not_blocked() {
     assert!(report.pages_with_content >= 1);
 }
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn processability_for_every_format_is_not_blocked() {
     for path in [
@@ -687,6 +729,7 @@ fn processability_for_every_format_is_not_blocked() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn processability_helpers_agree_with_health_variant() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -704,6 +747,7 @@ fn processability_helpers_agree_with_health_variant() {
     }
 }
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn processability_is_processable_mirrors_blockers() {
     for path in [
@@ -722,6 +766,7 @@ fn processability_is_processable_mirrors_blockers() {
     }
 }
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn processability_issues_are_unique_per_kind() {
     // Core determinism guarantee: each HealthIssue variant appears at most
@@ -752,6 +797,7 @@ fn processability_issues_are_unique_per_kind() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn processability_pages_with_content_matches_text_by_page() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -764,6 +810,7 @@ fn processability_pages_with_content_matches_text_by_page() {
     assert_eq!(report.pages_with_content, expected);
 }
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn processability_warning_count_matches_structure_warnings() {
     // `warning_count` is the total non-fatal warning count that fed into
@@ -787,6 +834,7 @@ fn processability_warning_count_matches_structure_warnings() {
     }
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn processability_is_idempotent_across_repeated_calls() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -795,6 +843,7 @@ fn processability_is_idempotent_across_repeated_calls() {
     assert_eq!(first, second, "processability must be deterministic");
 }
 
+#[cfg(feature = "pdf")]
 #[test]
 fn processability_serializes_round_trip_via_serde() {
     let doc = Document::open(corpus("pdf/structured_report.pdf")).unwrap();
@@ -815,6 +864,7 @@ fn processability_serializes_round_trip_via_serde() {
 // surfaces a health report *before* refusing to construct). We exercise them
 // directly so the classification stays correct whatever path feeds them.
 
+#[allow(dead_code)]
 fn synthetic_metadata(
     pages: u32,
     encrypted: bool,
@@ -963,6 +1013,7 @@ fn processability_from_inputs_groups_warnings_deterministically() {
 // Non-regression: Brick D processability call is non-invasive
 // ---------------------------------------------------------------------------
 
+#[cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
 #[test]
 fn brick_d_processability_is_non_invasive() {
     // Mirror of the Brick B / Brick C guards: calling `processability()`

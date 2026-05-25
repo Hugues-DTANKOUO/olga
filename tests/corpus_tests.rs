@@ -1,3 +1,9 @@
+// Per v0.1.2 [features] block : this test binary exercises all
+// 4 decoders simultaneously (cross-format corpus contract). It is
+// gated on the union of the 4 features ; when any one is disabled,
+// the binary compiles to an empty shell.
+#![cfg(all(feature = "docx", feature = "html", feature = "pdf", feature = "xlsx"))]
+
 use std::io::{Cursor, Write};
 
 use olga::formats::docx::DocxDecoder;
