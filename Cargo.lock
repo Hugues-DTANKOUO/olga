@@ -1142,7 +1142,7 @@ dependencies = [
 
 [[package]]
 name = "olgadoc"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "olga",
  "pyo3",
