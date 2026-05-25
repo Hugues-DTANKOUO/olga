@@ -12,6 +12,12 @@
 //! than exact positions, because the spatial renderer auto-scales columns
 //! / rows from content density. Position-checking would make the tests
 //! brittle to harmless changes in `compute_target_cols`.
+//!
+//! Per v0.1.2 [features] block : `output::markdown` + `output::
+//! spatial` are PDF-only modules. This test binary is gated on the
+//! `pdf` feature ; when disabled, it compiles to an empty shell.
+
+#![cfg(feature = "pdf")]
 
 use olga::output::markdown::{self, MarkdownConfig};
 use olga::output::spatial::{self, SpatialConfig};

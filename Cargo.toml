@@ -3,7 +3,7 @@ members = ["olgadoc"]
 
 [package]
 name = "olga"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 rust-version = "1.91"
 description = "Four formats, one engine. PDF, DOCX, XLSX, HTML → Markdown and typed JSON. 15–40× faster than equivalent-quality OSS tools, with pipeline pre-flight and element-level provenance."
@@ -24,20 +24,52 @@ path = "src/lib.rs"
 name = "olga"
 path = "src/main.rs"
 
+[features]
+# Default feature set preserves v0.1.1 behavior — all four format
+# decoders are available out of the box. Downstream consumers (e.g.
+# mobile surfaces with binary-size budgets) can opt out via
+# `default-features = false` and select only the formats they need
+# (e.g. `features = ["xlsx", "html"]`).
+default = ["xlsx", "pdf", "docx", "html"]
+
+# Per-format features — each enables the relevant decoder + its
+# format-specific dependencies. The umbrella `_ooxml` private feature
+# pulls in the shared `quick-xml` + `zip` deps that both DOCX and
+# XLSX need ; consumers should NOT enable `_ooxml` directly.
+xlsx = ["dep:calamine", "_ooxml"]
+pdf = ["dep:pdf_oxide"]
+docx = ["_ooxml"]
+html = ["dep:scraper", "dep:ego-tree"]
+
+# Private umbrella : pulled in by `xlsx` and `docx`. Both OOXML
+# formats share quick-xml (parsing) + zip (archive reading). Listing
+# them under one feature de-duplicates the dep graph and prevents
+# accidental drift if either format adds another OOXML-specific dep
+# later. The leading underscore signals "private" per the Cargo
+# features convention.
+_ooxml = ["dep:quick-xml", "dep:zip"]
+
 [dependencies]
+# ─── Always-on deps ─────────────────────────────────────────────
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# Shared across all 4 formats + structure engine — kept mandatory.
 unicode-normalization = "0.1"
-quick-xml = "0.39"
-zip = { version = "8", default-features = false, features = ["deflate"] }
-calamine = { version = "0.34", features = ["dates"] }
-ego-tree = "0.11"
-scraper = "0.26"
-pdf_oxide = "0.3.36"
 log = "0.4"
 thiserror = "2"
+# Structure engine layout (rstar R-tree) — used by all formats.
 rstar = "0.12"
+# CLI binary — small footprint, always on (CLI dispatch handles
+# disabled-feature cases at runtime).
 clap = { version = "4", features = ["derive"] }
+
+# ─── Format-specific deps (optional via [features] above) ───────
+calamine = { version = "0.34", features = ["dates"], optional = true }
+pdf_oxide = { version = "0.3.36", optional = true }
+ego-tree = { version = "0.11", optional = true }
+scraper = { version = "0.26", optional = true }
+quick-xml = { version = "0.39", optional = true }
+zip = { version = "8", default-features = false, features = ["deflate"], optional = true }
 
 [dev-dependencies]
 proptest = "1"

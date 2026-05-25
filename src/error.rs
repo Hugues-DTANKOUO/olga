@@ -10,10 +10,24 @@ pub enum IdpError {
     Io(#[from] std::io::Error),
 
     /// ZIP archive error (corrupt archive, missing entry, etc.).
+    ///
+    /// Gated on `any(feature = "docx", feature = "xlsx")` per v0.1.2 —
+    /// the `zip` crate is itself optional via the umbrella `_ooxml`
+    /// private feature. When neither OOXML format is enabled, ZIP
+    /// files are surfaced as [`IdpError::UnsupportedFormat`] at
+    /// detection time and this variant is unreachable.
+    #[cfg(any(feature = "docx", feature = "xlsx"))]
     #[error("ZIP error: {0}")]
     Zip(#[from] zip::result::ZipError),
 
     /// XML parsing error.
+    ///
+    /// Gated on `any(feature = "docx", feature = "xlsx")` per v0.1.2 —
+    /// the `quick-xml` crate is itself optional via the umbrella
+    /// `_ooxml` private feature. When neither OOXML format is
+    /// enabled, XML parsing has no entry point in Olga's pipeline
+    /// and this variant is unreachable.
+    #[cfg(any(feature = "docx", feature = "xlsx"))]
     #[error("XML parsing error: {0}")]
     Xml(#[from] quick_xml::Error),
 

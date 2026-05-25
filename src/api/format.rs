@@ -8,6 +8,7 @@
 //! for ZIP-based OOXML files, a small scan of the ZIP central directory to
 //! tell DOCX apart from XLSX.
 
+#[cfg(any(feature = "docx", feature = "xlsx"))]
 use std::io::Cursor;
 
 use crate::error::{IdpError, IdpResult};
@@ -31,13 +32,31 @@ pub type Format = DocumentFormat;
 /// Returns [`IdpError::UnsupportedFormat`] if no signature matches.
 pub fn detect_format(data: &[u8]) -> IdpResult<Format> {
     // --- PDF ---
+    //
+    // The PDF magic byte signature `%PDF-` is detected regardless of
+    // feature ; the decoder dispatch returns UnsupportedFormat with
+    // a "feature disabled" message if `pdf` feature is off.
     if data.starts_with(b"%PDF-") {
         return Ok(Format::Pdf);
     }
 
     // --- ZIP-based OOXML (DOCX, XLSX) ---
+    //
+    // The ZIP central-directory scan to distinguish DOCX vs XLSX
+    // requires the `zip` dep, which is pulled in only when either
+    // `docx` or `xlsx` feature is enabled (via the umbrella `_ooxml`
+    // private feature). When neither feature is on, ZIP files are
+    // surfaced as UnsupportedFormat at detection time.
+    #[cfg(any(feature = "docx", feature = "xlsx"))]
     if data.starts_with(b"PK\x03\x04") {
         return detect_ooxml_flavor(data);
+    }
+    #[cfg(not(any(feature = "docx", feature = "xlsx")))]
+    if data.starts_with(b"PK\x03\x04") {
+        return Err(IdpError::UnsupportedFormat(
+            "ZIP archive detected but both `docx` and `xlsx` features are disabled at compile time"
+                .to_string(),
+        ));
     }
 
     // --- HTML heuristic on a preview prefix (case-insensitive, byte-level). ---
@@ -55,6 +74,10 @@ pub fn detect_format(data: &[u8]) -> IdpResult<Format> {
 ///
 /// Both formats share the ZIP + Open Packaging Conventions base, so we rely on
 /// the canonical top-level directory: `word/` for DOCX, `xl/` for XLSX.
+///
+/// Gated on `any(feature = "docx", feature = "xlsx")` — the `zip`
+/// crate is itself optional via the umbrella `_ooxml` private feature.
+#[cfg(any(feature = "docx", feature = "xlsx"))]
 fn detect_ooxml_flavor(data: &[u8]) -> IdpResult<Format> {
     let mut archive = zip::ZipArchive::new(Cursor::new(data)).map_err(|e| {
         IdpError::UnsupportedFormat(format!("ZIP signature present but archive is invalid: {e}"))

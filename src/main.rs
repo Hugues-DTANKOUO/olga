@@ -16,9 +16,16 @@ use std::time::Instant;
 use clap::Parser;
 
 use olga::error::IdpError;
+// CLI decoder imports — gated per v0.1.2 [features] block. The
+// `select_decoder` dispatch returns UnsupportedFormat for any
+// extension whose corresponding feature is disabled at compile time.
+#[cfg(feature = "docx")]
 use olga::formats::docx::DocxDecoder;
+#[cfg(feature = "html")]
 use olga::formats::html::HtmlDecoder;
+#[cfg(feature = "pdf")]
 use olga::formats::pdf::PdfDecoder;
+#[cfg(feature = "xlsx")]
 use olga::formats::xlsx::XlsxDecoder;
 use olga::output::OutputFormat;
 use olga::structure::{StructureConfig, StructureEngine};
@@ -69,6 +76,10 @@ fn run_process(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or("")
         .to_lowercase();
 
+    // `is_pdf` only consumed by the PDF spatial-render branch below, which
+    // is itself cfg-gated on `feature = "pdf"`. Suppress the unused-var
+    // warning when the feature is disabled at compile time.
+    #[cfg_attr(not(feature = "pdf"), allow(unused_variables))]
     let is_pdf = ext == "pdf";
     let is_docx_xlsx = matches!(ext.as_str(), "docx" | "docm" | "xlsx" | "xls");
 
@@ -81,6 +92,11 @@ fn run_process(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     //
     // The spatial renderers use pdf_oxide character-level bounding boxes
     // directly and only work for PDF.  Non-PDF formats fall through.
+    //
+    // Gated on the `pdf` cargo feature per v0.1.2 : when `pdf` is
+    // disabled at compile time, the entire PDF spatial-render branch
+    // is excluded and PDF files surface as UnsupportedFormat downstream.
+    #[cfg(feature = "pdf")]
     if is_pdf && !matches!(format, OutputFormat::Json) {
         let t_render = Instant::now();
         let (output_string, page_count) = match format {
@@ -423,10 +439,30 @@ fn json_string(value: &serde_json::Value, cli: &Cli) -> Result<String, serde_jso
 
 fn select_decoder(ext: &str) -> Result<Box<dyn FormatDecoder>, Box<dyn std::error::Error>> {
     match ext {
+        #[cfg(feature = "pdf")]
         "pdf" => Ok(Box::new(PdfDecoder)),
+        #[cfg(not(feature = "pdf"))]
+        "pdf" => Err(Box::new(IdpError::UnsupportedFormat(
+            "PDF decoder disabled at compile time (feature `pdf` not enabled)".to_string(),
+        ))),
+        #[cfg(feature = "docx")]
         "docx" | "docm" => Ok(Box::new(DocxDecoder)),
+        #[cfg(not(feature = "docx"))]
+        "docx" | "docm" => Err(Box::new(IdpError::UnsupportedFormat(
+            "DOCX decoder disabled at compile time (feature `docx` not enabled)".to_string(),
+        ))),
+        #[cfg(feature = "xlsx")]
         "xlsx" | "xls" => Ok(Box::new(XlsxDecoder)),
+        #[cfg(not(feature = "xlsx"))]
+        "xlsx" | "xls" => Err(Box::new(IdpError::UnsupportedFormat(
+            "XLSX decoder disabled at compile time (feature `xlsx` not enabled)".to_string(),
+        ))),
+        #[cfg(feature = "html")]
         "html" | "htm" => Ok(Box::new(HtmlDecoder)),
+        #[cfg(not(feature = "html"))]
+        "html" | "htm" => Err(Box::new(IdpError::UnsupportedFormat(
+            "HTML decoder disabled at compile time (feature `html` not enabled)".to_string(),
+        ))),
         other => Err(Box::new(IdpError::UnsupportedFormat(format!(
             "unknown extension '.{}' (supported: pdf, docx, xlsx, html)",
             other

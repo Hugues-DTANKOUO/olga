@@ -1,3 +1,8 @@
+// Gated on the `pdf` cargo feature per v0.1.2 [features] block.
+// When `pdf` is disabled, this test binary compiles to an empty
+// shell with zero tests — no failure, no false-positive coverage.
+#![cfg(feature = "pdf")]
+
 //! Integration tests for the PDF decoder.
 //!
 //! Test strategy (v2):

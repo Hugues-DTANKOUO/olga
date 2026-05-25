@@ -14,6 +14,7 @@ pub mod image;
 pub mod metadata;
 pub mod primitives;
 pub mod provenance;
+pub mod rtl;
 
 // Re-export the most commonly used types at the model level.
 // External consumers just write `use olga::model::*`.

@@ -13,13 +13,26 @@
 //!   formatting (**bold**, *italic*, `[links](url)`). Same geometric approach
 //!   as spatial, enriched with font and annotation metadata.
 
+// PDF-specific spatial renderers + their helpers — gated on the `pdf`
+// feature per v0.1.2 `[features]` block. These modules consume
+// `pdf_oxide::layout::TextChar` + PDF segments directly and have no
+// meaningful rendering path without PDF support.
+//
+// `json` + `md_tree` + `text_tree` + `prim_spatial` below remain
+// feature-agnostic — they operate on `DocumentNode` / generic
+// `Primitive` shapes that work for DOCX / XLSX / HTML.
+#[cfg(feature = "pdf")]
 pub(crate) mod col_resolve;
 pub mod json;
+#[cfg(feature = "pdf")]
 pub mod markdown;
 pub mod md_tree;
 pub mod prim_spatial;
+#[cfg(feature = "pdf")]
 pub(crate) mod row_cluster;
+#[cfg(feature = "pdf")]
 pub(crate) mod rules;
+#[cfg(feature = "pdf")]
 pub mod spatial;
 pub mod text_tree;
 
