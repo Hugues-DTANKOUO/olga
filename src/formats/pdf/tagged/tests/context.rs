@@ -67,13 +67,13 @@ fn tagged_context_extracts_table_coordinates() {
         page.metadata_for_mcid(Some(1))
             .hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0, .. }))
     );
     assert!(
         page.metadata_for_mcid(Some(2))
             .hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1, .. }))
     );
     assert!(
         page.metadata_for_mcid(Some(3))

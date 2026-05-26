@@ -108,7 +108,16 @@ fn serialize_roundtrip_hint_kinds() {
             col: 1,
             depth: 2,
         },
-        HintKind::TableHeader { col: 0 },
+        HintKind::TableHeader {
+            col: 0,
+            rowspan: 1,
+            colspan: 1,
+        },
+        HintKind::TableHeader {
+            col: 1,
+            rowspan: 1,
+            colspan: 2,
+        },
         HintKind::BlockQuote,
         HintKind::CodeBlock,
         HintKind::PageHeader,

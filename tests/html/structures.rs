@@ -223,7 +223,7 @@ fn decode_aria_table_structure_from_divs() {
     assert!(
         name.hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0, .. }))
     );
     assert!(engineer.hints.iter().any(|hint| matches!(
         hint.kind,
@@ -361,7 +361,7 @@ fn decode_css_display_table_structure_from_divs() {
     assert!(
         name.hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0, .. }))
     );
     assert!(engineer.hints.iter().any(|hint| matches!(
         hint.kind,

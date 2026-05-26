@@ -13,7 +13,7 @@ impl TableDetector {
         for hint in hints {
             let col = match &hint.hint.kind {
                 HintKind::TableCell { col, .. } => *col,
-                HintKind::TableHeader { col } => *col,
+                HintKind::TableHeader { col, .. } => *col,
                 _ => continue,
             };
             if !cols.contains(&col) {
@@ -60,11 +60,15 @@ impl TableDetector {
                         rowspan,
                         colspan,
                     },
-                    HintKind::TableHeader { col } => HintKind::TableCellContinuation {
+                    HintKind::TableHeader {
+                        col,
+                        rowspan,
+                        colspan,
+                    } => HintKind::TableCellContinuation {
                         row: 0,
                         col,
-                        rowspan: 1,
-                        colspan: 1,
+                        rowspan,
+                        colspan,
                     },
                     other => other,
                 };

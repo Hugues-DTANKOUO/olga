@@ -280,8 +280,14 @@ fn emit_sheet_cell(
     if let Some(table) = ctx.native_table_for_cell(row_idx, col_idx) {
         hints.push(native_table_hint(table, row_idx, col_idx, rowspan, colspan));
     } else if heuristic_header_row == Some(row_idx) {
+        // Preserve the merge span on heuristic header cells — XLSX
+        // category-level groupings (e.g. row 0 = "Identité" merged
+        // over cols 0-1) carry the geometric span the consumer needs
+        // to reconstruct the header layout.
         hints.push(SemanticHint::from_format(HintKind::TableHeader {
             col: col_idx,
+            rowspan,
+            colspan,
         }));
     } else if ctx.native_tables.is_empty() {
         hints.push(SemanticHint::from_format(HintKind::TableCell {
@@ -400,7 +406,15 @@ fn native_table_hint(
     let rel_row = row_idx.saturating_sub(table.start_row);
     let rel_col = col_idx.saturating_sub(table.start_col);
     if table.is_header_cell(row_idx, col_idx) {
-        SemanticHint::from_format(HintKind::TableHeader { col: rel_col })
+        // Preserve the merge span on native-table header cells —
+        // same discipline as the heuristic-header branch above so
+        // merged header bands (category-level groupings spanning
+        // multiple columns) surface their geometric span faithfully.
+        SemanticHint::from_format(HintKind::TableHeader {
+            col: rel_col,
+            rowspan,
+            colspan,
+        })
     } else {
         SemanticHint::from_format(HintKind::TableCell {
             row: rel_row,

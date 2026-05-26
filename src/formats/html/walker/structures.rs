@@ -239,7 +239,11 @@ pub(super) fn walk_table_cell(
         let y = state.advance_y();
         let order = state.next_order();
         let hint = if effective_header {
-            SemanticHint::from_format(HintKind::TableHeader { col })
+            SemanticHint::from_format(HintKind::TableHeader {
+                col,
+                rowspan,
+                colspan,
+            })
         } else {
             SemanticHint::from_format(HintKind::TableCell {
                 row,

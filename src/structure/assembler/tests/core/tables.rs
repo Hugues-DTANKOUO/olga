@@ -99,8 +99,22 @@ fn table_header_marked_in_metadata() {
     let flush = page_flush(
         0,
         vec![
-            hinted(text_prim(0.1, "Name", 0), HintKind::TableHeader { col: 0 }),
-            hinted(text_prim(0.1, "Age", 1), HintKind::TableHeader { col: 1 }),
+            hinted(
+                text_prim(0.1, "Name", 0),
+                HintKind::TableHeader {
+                    col: 0,
+                    rowspan: 1,
+                    colspan: 1,
+                },
+            ),
+            hinted(
+                text_prim(0.1, "Age", 1),
+                HintKind::TableHeader {
+                    col: 1,
+                    rowspan: 1,
+                    colspan: 1,
+                },
+            ),
             hinted(
                 text_prim(0.2, "Alice", 2),
                 HintKind::TableCell {

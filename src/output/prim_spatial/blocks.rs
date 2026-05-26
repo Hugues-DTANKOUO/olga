@@ -82,7 +82,7 @@ pub(super) fn extract_blocks(prims: &[&Primitive]) -> Vec<Block> {
             match &hint.kind {
                 HintKind::Heading { level } => heading_level = *level,
                 HintKind::TableCell { row, col, .. } => table_cell = Some((*row, *col)),
-                HintKind::TableHeader { col } => table_cell = Some((0, *col)),
+                HintKind::TableHeader { col, .. } => table_cell = Some((0, *col)),
                 HintKind::ListItem { ordered, .. } => {
                     is_list_item = true;
                     list_ordered = *ordered;

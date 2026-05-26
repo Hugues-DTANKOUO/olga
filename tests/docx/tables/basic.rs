@@ -75,12 +75,12 @@ fn decode_table_header_rows_from_native_tbl_header() {
     assert!(
         name.hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0, .. }))
     );
     assert!(
         role.hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1, .. }))
     );
     assert!(alice.hints.iter().any(|hint| {
         matches!(

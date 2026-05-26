@@ -109,7 +109,7 @@ fn idp_detect_cell_texts(page: &[olga::model::Primitive]) -> (usize, HashSet<Str
                     }
                 }
             }
-            HintKind::TableHeader { col } => {
+            HintKind::TableHeader { col, .. } => {
                 seen_cells.insert((0, *col));
 
                 // Extract the text content.
