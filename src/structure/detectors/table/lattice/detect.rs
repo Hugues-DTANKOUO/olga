@@ -113,7 +113,11 @@ impl TableDetector {
                 }
 
                 let kind = if row == 0 && is_header_row {
-                    HintKind::TableHeader { col: col as u32 }
+                    HintKind::TableHeader {
+                        col: col as u32,
+                        rowspan,
+                        colspan,
+                    }
                 } else {
                     HintKind::TableCell {
                         row: row as u32,

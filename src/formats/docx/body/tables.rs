@@ -298,7 +298,11 @@ impl ActiveTableState {
                         )
                     });
                     let table_hint = if cell.is_header {
-                        SemanticHint::from_format(HintKind::TableHeader { col: cell.col })
+                        SemanticHint::from_format(HintKind::TableHeader {
+                            col: cell.col,
+                            rowspan: cell.rowspan,
+                            colspan: cell.colspan,
+                        })
                     } else {
                         SemanticHint::from_format(HintKind::TableCell {
                             row: cell.row,

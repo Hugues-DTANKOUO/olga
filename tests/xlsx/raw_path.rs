@@ -86,7 +86,7 @@ fn decode_native_table_headers_override_sheet_heuristic() {
     assert!(
         name.hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0, .. }))
     );
 
     let age = result
@@ -100,7 +100,7 @@ fn decode_native_table_headers_override_sheet_heuristic() {
     assert!(
         age.hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1, .. }))
     );
 
     let alice = result
@@ -221,7 +221,7 @@ fn decode_hidden_first_row_still_anchors_header_heuristic() {
         shadow
             .hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 0, .. }))
     );
 
     let ghost = result
@@ -236,7 +236,7 @@ fn decode_hidden_first_row_still_anchors_header_heuristic() {
         ghost
             .hints
             .iter()
-            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1 }))
+            .any(|hint| matches!(hint.kind, HintKind::TableHeader { col: 1, .. }))
     );
 
     let alice = result

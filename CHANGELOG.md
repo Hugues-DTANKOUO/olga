@@ -8,6 +8,30 @@ Starting with v0.2.0, each release will be documented with granular
 `Added` / `Changed` / `Fixed` / `Removed` / `Security` sections. v0.1.0
 is the single foundational cut that establishes the baseline.
 
+## [0.1.3] — 2026-05-26
+
+> Fix : preserve merge span on header cells (`HintKind::TableHeader` now carries `rowspan` + `colspan`).
+
+### Fixed
+
+- **Merged header cells now surface their geometric span faithfully.** Prior to v0.1.3, `HintKind::TableHeader` only carried `col: u32` ; the merge span was computed internally by the XLSX decoder (`SheetContext::merge_span`) and the non-origin cells were correctly skipped (`is_merged_non_origin`), but the public `api::TableCell.rowspan` / `colspan` for header cells were hardcoded to `1` regardless of the actual merge geometry. Downstream consumers walking `Document::tables()` saw `(0,0) "Identité" colspan=1`, `(0,2) "Tarification" colspan=1`, `(0,4) "Stock" colspan=1` for a row-0 header band that merged `(0,0)..(0,1)` + `(0,2)..(0,3)` — the column gaps signaled the merges but the geometric span was lost at the API frontier. This made it harder to write robust consumers for XLSX with category-level header groupings (a common real-world pattern).
+
+### Changed
+
+- **`HintKind::TableHeader`** extended from `{ col: u32 }` to `{ col: u32, rowspan: u32, colspan: u32 }`. The two new fields default to `1` for the non-merged case and reflect the source document's geometric merge span for merged origins. **Source-incompatible for consumers destructuring all fields** (existing consumers using `matches!(.., HintKind::TableHeader { col: N, .. })` keep working ; consumers using `{ col }` need to update to `{ col, .. }` or `{ col, rowspan, colspan }`).
+- All 5 emit sites updated to thread the rowspan/colspan through :
+  - `formats/xlsx/sheets/emit.rs` (heuristic header path + `native_table_hint`)
+  - `formats/pdf/tagged/semantics.rs` (passes `cell.rowspan` / `cell.colspan` from active cell)
+  - `formats/html/walker/structures.rs` (passes the parsed `<th rowspan=… colspan=…>` attributes)
+  - `formats/docx/body/tables.rs` (passes `cell.rowspan` / `cell.colspan` from active cell)
+  - `structure/detectors/table/lattice/detect.rs` (defaults to `1` / `1` — lattice-detected tables don't carry merge geometry from heuristics)
+- `structure/assembler/classify.rs` propagates the new fields into `PrimaryRole::TableCell { rowspan, colspan, is_header: true, ... }` instead of hardcoding `1` / `1`.
+- `structure/detectors/table/continuation.rs::promote_to_continuation` preserves the span when promoting `TableHeader` → `TableCellContinuation` (instead of dropping to `1` / `1`).
+
+### Downstream impact
+
+Aliya's `crates/olga-bridge` (Chunk 3.1, ADR-0068 D9.6) discovered this gap empirically while exercising the messy-real-world resilience fixture : the bridge re-export surface `olga_bridge::TableCell` showed `max_colspan = 1` even when the input xlsx had `merge_cells("Identité", colspan=2)`. The fix unblocks the consumer-side T pipeline at Chunk 5.1 onboarding — instead of inferring merges by gap detection, the T-pipeline dispatches directly on `TableCell.colspan > 1`.
+
 ## [0.1.2] — 2026-05-25
 
 > Per-format feature flags — opt-out binary size for downstream consumers (e.g. mobile surfaces).

@@ -47,15 +47,19 @@ impl Assembler {
                         }
                     );
                 }
-                HintKind::TableHeader { col } => {
+                HintKind::TableHeader {
+                    col,
+                    rowspan,
+                    colspan,
+                } => {
                     candidate!(
                         best,
                         1,
                         PrimaryRole::TableCell {
                             row: 0,
                             col: *col,
-                            rowspan: 1,
-                            colspan: 1,
+                            rowspan: *rowspan,
+                            colspan: *colspan,
                             is_header: true,
                             confidence: hint.confidence,
                         }

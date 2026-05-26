@@ -127,7 +127,18 @@ pub enum HintKind {
     /// of a parent table cell in the Primitive layer.
     FlattenedFromTableCell { row: u32, col: u32, depth: u32 },
     /// A header cell in a table.
-    TableHeader { col: u32 },
+    ///
+    /// `rowspan` / `colspan` are 1-based ; they reflect the geometric
+    /// merge span of the header cell in the source document. For
+    /// non-merged header cells both are `1`. For merged header bands
+    /// (e.g. an XLSX with a category-level grouping spanning multiple
+    /// columns), the origin cell carries the full span so downstream
+    /// consumers can reconstruct the header layout faithfully.
+    TableHeader {
+        col: u32,
+        rowspan: u32,
+        colspan: u32,
+    },
     /// A blockquote.
     BlockQuote,
     /// A code block.
@@ -190,7 +201,17 @@ impl fmt::Display for HintKind {
             Self::FlattenedFromTableCell { row, col, depth } => {
                 write!(f, "FlatTd({},{},d={})", row, col, depth)
             }
-            Self::TableHeader { col } => write!(f, "Th({})", col),
+            Self::TableHeader {
+                col,
+                rowspan,
+                colspan,
+            } => {
+                if *rowspan == 1 && *colspan == 1 {
+                    write!(f, "Th({})", col)
+                } else {
+                    write!(f, "Th({},r={},c={})", col, rowspan, colspan)
+                }
+            }
             Self::BlockQuote => write!(f, "BQ"),
             Self::CodeBlock => write!(f, "Code"),
             Self::PageHeader => write!(f, "PgHdr"),

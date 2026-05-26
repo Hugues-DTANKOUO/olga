@@ -170,13 +170,13 @@ fn decode_simple_table() {
         result.primitives[0]
             .hints
             .iter()
-            .any(|h| matches!(h.kind, HintKind::TableHeader { col: 0 }))
+            .any(|h| matches!(h.kind, HintKind::TableHeader { col: 0, .. }))
     );
     assert!(
         result.primitives[1]
             .hints
             .iter()
-            .any(|h| matches!(h.kind, HintKind::TableHeader { col: 1 }))
+            .any(|h| matches!(h.kind, HintKind::TableHeader { col: 1, .. }))
     );
     assert!(
         result.primitives[2]
