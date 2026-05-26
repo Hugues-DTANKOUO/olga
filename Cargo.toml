@@ -68,7 +68,7 @@ calamine = { version = "0.34", features = ["dates"], optional = true }
 pdf_oxide = { version = "0.3.36", optional = true }
 ego-tree = { version = "0.11", optional = true }
 scraper = { version = "0.26", optional = true }
-quick-xml = { version = "0.39", optional = true }
+quick-xml = { version = "0.40", optional = true }
 zip = { version = "8", default-features = false, features = ["deflate"], optional = true }
 
 [dev-dependencies]
