@@ -76,7 +76,7 @@ jobs:
         # Even on PRs we upload the built site so the deploy job on main can
         # simply download it, and so reviewers can grab a preview tarball if
         # they want to inspect the rendered HTML.
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: site
           path: site/
